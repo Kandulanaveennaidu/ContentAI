@@ -11,12 +11,12 @@ export function Footer() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-               {/* Reference the updated SVG logo */}
-               <Image src="/logo.svg" alt="ContentAI Logo" width={40} height={40} /> 
-               <span className="text-xl font-bold tracking-tight">
-                 Content<span className="text-primary">AI</span>
-               </span>
+            {/* Increased size of logo and text */}
+            <Link href="/" className="flex items-center gap-3 mb-4"> 
+              <Image src="/logo.svg" alt="ContentAI Logo" width={50} height={50} /> 
+              <span className="text-2xl font-bold tracking-tight"> {/* Increased text size */}
+                Content<span className="text-primary">AI</span>
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">
               Elevate your content with AI-powered analysis and insights. Understand readability, predict engagement, and craft messages that resonate.
@@ -74,4 +74,5 @@ export function Footer() {
     </footer>
   );
 }
+
 
