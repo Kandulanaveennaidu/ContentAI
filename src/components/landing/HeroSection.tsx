@@ -16,7 +16,7 @@ export function HeroSection() {
       <VideoBackground src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-vr-glasses-42930-large.mp4" />
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground drop-shadow-lg"
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white drop-shadow-lg" // Changed text-primary-foreground to text-white
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -58,3 +58,4 @@ export function HeroSection() {
     </section>
   );
 }
+
