@@ -30,8 +30,9 @@ export function VideoBackground({ src }: VideoBackgroundProps) {
         data-ai-hint="abstract technology"
       />
       {/* Changed gradient to ensure darker background for better text visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70"></div>
+      <div className="absolute inset-0 bg-black/75"></div>
     </div>
   );
 }
+
 
