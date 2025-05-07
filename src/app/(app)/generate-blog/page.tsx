@@ -4,8 +4,8 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import ReactMarkdown from 'react-markdown'; // Import react-markdown
-import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown plugin
+import ReactMarkdown from 'react-markdown'; // Correct import
+import remarkGfm from 'remark-gfm'; // Correct import
 import { generateBlogPost, type GenerateBlogPostInput, type GenerateBlogPostOutput } from '@/ai/flows/generate-blog-post-flow';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import type { BlogPost } from '@/lib/blog-data'; // Import base BlogPost type
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label'; // Import Label
 
 const blogGenFormSchema = z.object({
   prompt: z.string().min(10, 'Prompt must be at least 10 characters.'),
