@@ -1,7 +1,7 @@
 // src/app/blog/[slug]/page.tsx
 "use client";
 
-import { useEffect, useState } from 'react'; // Import hooks
+import React, { useEffect, useState } from 'react'; // Import React for React.use() and hooks
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { staticBlogPosts, loadUserBlogPosts, type BlogPost, type ContentBlock } from '@/lib/blog-data'; // Import static posts and load function
@@ -120,7 +120,8 @@ const renderContentBlock = (block: ContentBlock, index: number): JSX.Element => 
 
 
 export default function BlogSlugPage({ params }: BlogSlugPageProps) {
-  const { slug } = params;
+  // Unwrap params using React.use() for Server Components
+  const { slug } = React.use(params); 
   const [post, setPost] = useState<BlogPost | null | undefined>(undefined); // undefined initial state for loading
   const [allPosts, setAllPosts] = useState<BlogPost[]>([]); // State to hold all posts
 
@@ -288,3 +289,4 @@ export default function BlogSlugPage({ params }: BlogSlugPageProps) {
     </div>
   );
 }
+

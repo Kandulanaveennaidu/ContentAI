@@ -1,8 +1,10 @@
+// src/app/case-studies/[slug]/page.tsx
 "use client";
 
+import React from 'react'; // Import React for React.use()
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { caseStudies, type CaseStudy } from '@/lib/case-studies-data'; // Import from the new data file
+import { caseStudies, type CaseStudy } from '@/lib/case-studies-data'; // Correct import path
 import type { PressContentBlock as CaseStudyContentBlock } from '@/lib/press-articles-data';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -107,7 +109,8 @@ const renderContentBlock = (block: CaseStudyContentBlock, index: number): JSX.El
 };
 
 export default function CaseStudySlugPage({ params }: CaseStudySlugPageProps) {
-  const { slug } = params;
+  // Unwrap params using React.use() for Server Components
+  const { slug } = React.use(params);
   const study = caseStudies.find((s) => s.slug === slug);
 
   if (!study) {

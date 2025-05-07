@@ -1,6 +1,7 @@
 // src/app/press/[slug]/page.tsx
 "use client";
 
+import React from 'react'; // Import React for React.use()
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { pressArticles, type PressArticle, type PressContentBlock } from '@/lib/press-articles-data';
@@ -108,7 +109,8 @@ const renderContentBlock = (block: PressContentBlock, index: number): JSX.Elemen
 };
 
 export default function PressSlugPage({ params }: PressSlugPageProps) {
-  const { slug } = params;
+   // Unwrap params using React.use() for Server Components
+  const { slug } = React.use(params);
   const article = pressArticles.find((p) => p.slug === slug);
 
   if (!article) {
