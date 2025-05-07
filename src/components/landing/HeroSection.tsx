@@ -50,11 +50,11 @@ export function HeroSection() {
           </Link>
           <Link href="#features" passHref>
              <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-               {/* Adjusted button styling for better contrast in both modes */}
+               {/* Updated className: Removed conflicting hover styles, using standard outline hover */}
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-foreground border-foreground/70 hover:bg-foreground hover:text-background transition-colors backdrop-blur-sm bg-black/30 dark:bg-white/30 hover:bg-white/90 dark:hover:bg-black/90" 
+                className="w-full sm:w-auto text-foreground border-foreground/70 backdrop-blur-sm bg-black/30 dark:bg-white/30 hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Learn More
