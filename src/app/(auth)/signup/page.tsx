@@ -36,17 +36,20 @@ export default function SignupPage() {
   });
 
   function onSubmit(data: SignupFormValues) {
-    console.log(data);
-    // Handle signup logic here
-    // For demonstration, set a localStorage item to simulate login
-    if (typeof window !== "undefined") {
-        localStorage.setItem('isLoggedIn', 'true');
-    }
+    console.log("Signup attempted:", data);
+    // Simulate successful signup logic (e.g., API call)
+    // In a real app, you'd handle the response here.
+
+    // For demonstration, we'll just show a success message
+    // and redirect to the login page. We won't automatically log them in.
+    
      toast({
-        title: "Account Created!",
-        description: "Welcome to ContentAI! You are now logged in.",
+        title: "Account Created Successfully!",
+        description: "Please log in to continue.",
     });
-    router.push('/dashboard'); // Redirect to dashboard or analyze page
+    
+    // Redirect to login page after successful signup
+    router.push('/login'); 
   }
 
   return (
@@ -119,3 +122,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

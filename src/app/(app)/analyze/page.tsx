@@ -49,8 +49,29 @@ type StoredAnalysis = {
   engagementResult: EngagementPredictionOutput | null;
 };
 
-const MAX_HISTORY_ITEMS = 10;
-const LOCAL_STORAGE_KEY = 'contentAnalysisHistory';
+const MAX_HISTORY_ITEMS = 15; // Increased history items
+const GENERIC_HISTORY_KEY = 'contentAnalysisHistory_guest'; // Key for non-logged-in users
+
+// Function to get the correct localStorage key based on login state
+const getHistoryStorageKey = (): string => {
+  if (typeof window !== 'undefined') {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const userProfile = localStorage.getItem('userProfile');
+    if (isLoggedIn && userProfile) {
+      try {
+        const profile = JSON.parse(userProfile);
+        // Use email or a unique ID if available; sanitize email for key usage
+        const userId = profile.email ? profile.email.replace(/[^a-zA-Z0-9]/g, '_') : profile.id || 'unknown_user';
+        return `contentAnalysisHistory_${userId}`;
+      } catch (e) {
+        console.error("Error parsing user profile for history key", e);
+        return GENERIC_HISTORY_KEY; // Fallback if profile is corrupted
+      }
+    }
+  }
+  return GENERIC_HISTORY_KEY; // Default for guest or SSR
+};
+
 
 const analyzePageTourSteps = [
   {
@@ -91,30 +112,59 @@ export default function AnalyzePage() {
   const [progress, setProgress] = useState(0);
   const [analysisHistory, setAnalysisHistory] = useState<StoredAnalysis[]>([]);
   const { startTour, isTourActive } = useTour();
+  const [historyStorageKey, setHistoryStorageKey] = useState(GENERIC_HISTORY_KEY);
+
+   // Update storage key when component mounts or login status potentially changes
+   useEffect(() => {
+    setHistoryStorageKey(getHistoryStorageKey());
+  }, []); // Runs once on mount
+
+   // Load history from the correct key
+   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedHistory = localStorage.getItem(historyStorageKey);
+      if (storedHistory) {
+         try {
+          const parsedHistory = JSON.parse(storedHistory);
+           // Basic validation: ensure it's an array
+           if(Array.isArray(parsedHistory)) {
+             setAnalysisHistory(parsedHistory);
+           } else {
+             console.warn("Stored history is not an array, resetting.");
+             localStorage.removeItem(historyStorageKey); // Clear invalid data
+             setAnalysisHistory([]);
+           }
+         } catch(e) {
+             console.error("Failed to parse history, resetting.", e);
+             localStorage.removeItem(historyStorageKey); // Clear corrupted data
+             setAnalysisHistory([]);
+         }
+      } else {
+        setAnalysisHistory([]); // Initialize empty if nothing stored
+      }
+    }
+  }, [historyStorageKey]); // Reload history if the key changes (e.g., user logs in/out)
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (storedHistory) {
-        setAnalysisHistory(JSON.parse(storedHistory));
-      }
-      
-      // Start tour if not completed
-      const tourCompleted = localStorage.getItem('appTourCompleted');
-      if (tourCompleted !== 'true' && !isTourActive) {
-        // Small delay to ensure DOM elements are ready
+      // Check if tour has been completed only after mount
+      const tourCompleted = localStorage.getItem('appTourCompleted') === 'true';
+      if (!tourCompleted && !isTourActive) {
         setTimeout(() => startTour(analyzePageTourSteps), 500);
       }
     }
-  }, [startTour, isTourActive]);
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTour, isTourActive]); // Dependencies are correct, disable ESLint warning for this line
 
 
   const saveHistory = useCallback((newHistory: StoredAnalysis[]) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newHistory));
+      // Always use the current dynamic storage key
+      localStorage.setItem(historyStorageKey, JSON.stringify(newHistory));
     }
     setAnalysisHistory(newHistory);
-  }, []);
+  }, [historyStorageKey]); // Dependency on historyStorageKey ensures we save to the right place
 
   useEffect(() => {
     if (isLoading) {
@@ -139,6 +189,22 @@ export default function AnalyzePage() {
     setProgress(10);
 
     try {
+      // Ensure history is loaded correctly before potentially adding to it
+      // (This might be redundant if useEffect already loaded it, but safe)
+      let currentHistory = [];
+      if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem(historyStorageKey);
+          if (stored) {
+              try {
+                  currentHistory = JSON.parse(stored);
+                  if (!Array.isArray(currentHistory)) currentHistory = []; // Ensure it's an array
+              } catch {
+                  currentHistory = []; // Reset if parsing fails
+              }
+          }
+      }
+
+
       const readabilityPromise = analyzeReadability({ content: contentToAnalyze });
       const engagementPromise = engagementPrediction({ content: contentToAnalyze });
 
@@ -157,7 +223,10 @@ export default function AnalyzePage() {
         readabilityResult: readabilityData,
         engagementResult: engagementData,
       };
-      saveHistory([newAnalysis, ...analysisHistory].slice(0, MAX_HISTORY_ITEMS));
+      
+      // Add to the *current* history state before saving
+      const updatedHistory = [newAnalysis, ...currentHistory].slice(0, MAX_HISTORY_ITEMS);
+      saveHistory(updatedHistory);
 
     } catch (err) {
       console.error("Analysis error:", err);
@@ -312,7 +381,7 @@ export default function AnalyzePage() {
                       <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
                         {readabilityResult.suggestions.map((tip, index) => (
                           <li key={index} className="flex items-start">
-                            <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
+                            <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent" /> 
                             <span>{tip}</span>
                           </li>
                         ))}
@@ -340,7 +409,7 @@ export default function AnalyzePage() {
                         <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
                           {engagementResult.actionableTips.map((tip, index) => (
                             <li key={index} className="flex items-start">
-                               <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
+                               <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent" /> 
                                <span>{tip}</span>
                             </li>
                           ))}
@@ -437,3 +506,4 @@ export default function AnalyzePage() {
     </div>
   );
 }
+

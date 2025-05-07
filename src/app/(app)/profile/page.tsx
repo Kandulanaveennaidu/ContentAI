@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit3, Mail, User, Shield, UploadCloud, Save } from "lucide-react";
+import { Edit3, Mail, User, Shield, UploadCloud, Save, ImagePlus } from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -21,73 +21,117 @@ const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email(), // Email is not editable, so validation is mostly for display
   bio: z.string().max(200, "Bio cannot exceed 200 characters.").optional(),
-  avatarDataUrl: z.string().optional(),
+  avatarDataUrl: z.string().optional(), // Stores the Base64 Data URL of the avatar
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+// Define a default structure in case nothing is in localStorage
 const defaultUser = {
   name: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  avatarDataUrl: "https://picsum.photos/seed/alexprofile/200",
-  bio: "Content strategist and AI enthusiast. Helping creators make an impact.",
+  email: "alex.j@example.com", // Use a generic default email
+  avatarDataUrl: `https://picsum.photos/seed/${Math.random()}/200`, // Default placeholder
+  bio: "Content strategist and AI enthusiast.",
   plan: "Pro Plan", // Plan is not part of the editable form for now
 };
 
 export default function ProfilePage() {
   const { toast } = useToast();
-  const [userProfile, setUserProfile] = useState<ProfileFormValues>(defaultUser);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(defaultUser.avatarDataUrl);
+  // Initialize state with a structure, but potentially empty values before loading
+  const [userProfile, setUserProfile] = useState<ProfileFormValues>({ name: '', email: '', bio: '', avatarDataUrl: ''});
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    defaultValues: userProfile,
+    defaultValues: userProfile, // Set initial default values
   });
 
+  // Load profile from localStorage on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedProfile = localStorage.getItem("userProfile");
+      let loadedProfile: ProfileFormValues;
+      
       if (storedProfile) {
-        const loadedProfile = JSON.parse(storedProfile);
-        setUserProfile(loadedProfile);
-        form.reset(loadedProfile); // Update form with loaded data
-        setAvatarPreview(loadedProfile.avatarDataUrl || defaultUser.avatarDataUrl);
+          try {
+              loadedProfile = JSON.parse(storedProfile);
+              // Ensure loaded profile has all necessary fields, fallback to default if missing
+              loadedProfile = { ...defaultUser, ...loadedProfile }; 
+          } catch (e) {
+              console.error("Failed to parse user profile from localStorage", e);
+              loadedProfile = { ...defaultUser }; // Use default if parsing fails
+              localStorage.setItem("userProfile", JSON.stringify(loadedProfile)); // Save corrected default
+          }
       } else {
-        // If no stored profile, save the default one
-        localStorage.setItem("userProfile", JSON.stringify(defaultUser));
-        form.reset(defaultUser);
+        // If no stored profile, use the default one and save it
+        loadedProfile = { ...defaultUser };
+        localStorage.setItem("userProfile", JSON.stringify(loadedProfile));
       }
+
+      setUserProfile(loadedProfile);
+      form.reset(loadedProfile); // Update form with loaded data AFTER setting state
+      setAvatarPreview(loadedProfile.avatarDataUrl || null);
     }
-  }, [form]);
+  }, [form]); // Rerun effect if 'form' object changes (though unlikely, it's good practice)
+
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) { // Limit file size (e.g., 2MB)
+         toast({
+            title: "Image Too Large",
+            description: "Please upload an image smaller than 2MB.",
+            variant: "destructive",
+         });
+         return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
         setAvatarPreview(dataUrl);
-        form.setValue("avatarDataUrl", dataUrl);
+        form.setValue("avatarDataUrl", dataUrl); // Update form state
       };
+      reader.onerror = () => {
+         toast({
+            title: "Error Reading File",
+            description: "Could not read the selected image file.",
+            variant: "destructive",
+         });
+      }
       reader.readAsDataURL(file);
     }
   };
 
   function onSubmit(data: ProfileFormValues) {
-    const updatedProfile = { ...userProfile, ...data, avatarDataUrl: avatarPreview || data.avatarDataUrl };
-    setUserProfile(updatedProfile);
+    // Combine current profile with form data, using the preview for avatar
+     const updatedProfile = { 
+        ...userProfile, // Include non-form fields like email, plan
+        ...data, // Overwrite with submitted form data (name, bio)
+        avatarDataUrl: avatarPreview || userProfile.avatarDataUrl // Use preview if changed, else keep old
+    };
+    setUserProfile(updatedProfile); // Update component state
+    
     if (typeof window !== "undefined") {
-      localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+      try {
+        localStorage.setItem("userProfile", JSON.stringify(updatedProfile)); // Save to localStorage
+         toast({
+            title: "Profile Updated",
+            description: "Your profile information has been saved.",
+        });
+        // Dispatch a custom event that the header can listen for
+        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: updatedProfile }));
+      } catch (e) {
+         console.error("Failed to save profile to localStorage", e);
+          toast({
+            title: "Save Error",
+            description: "Could not save profile. Storage might be full.",
+            variant: "destructive",
+        });
+      }
     }
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been saved.",
-    });
-     // Force re-render of header by briefly navigating away and back or using a state update
-    // This is a common pattern if the header doesn't re-render automatically.
-    // Forcing a reload, although not ideal for SPAs, ensures header updates for now.
-    window.dispatchEvent(new Event('storage')) // Or a more targeted event if Header listens to it
+   
   }
 
   const cardVariants = {
@@ -118,22 +162,34 @@ export default function ProfilePage() {
         <div className="md:col-span-1 space-y-6">
           <Card className="shadow-lg">
             <CardContent className="pt-6 flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 mb-4 border-2 border-primary">
-                <AvatarImage src={avatarPreview || undefined} alt={userProfile.name} data-ai-hint="person portrait" />
-                <AvatarFallback>{userProfile.name ? userProfile.name.substring(0,1).toUpperCase() : "U"}</AvatarFallback>
-              </Avatar>
+              <div className="relative group">
+                <Avatar className="h-24 w-24 mb-4 border-2 border-primary group-hover:opacity-80 transition-opacity">
+                  <AvatarImage src={avatarPreview || undefined} alt={userProfile.name || 'User'} data-ai-hint="person portrait" />
+                  <AvatarFallback>{userProfile.name ? userProfile.name.substring(0,1).toUpperCase() : "U"}</AvatarFallback>
+                </Avatar>
+                 {/* Upload Overlay */}
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full mb-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload new photo"
+                  >
+                   <ImagePlus className="h-8 w-8 text-white" />
+                </div>
+              </div>
               <h2 className="text-xl font-semibold">{form.watch("name")}</h2>
               <p className="text-sm text-muted-foreground">{userProfile.email}</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => fileInputRef.current?.click()}>
-                <UploadCloud className="mr-2 h-4 w-4" /> Change Photo
-              </Button>
+               {/* Hidden File Input */}
               <Input 
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
-                accept="image/*" 
+                accept="image/png, image/jpeg, image/webp" // Specify accepted types
                 onChange={handleAvatarChange} 
               />
+               {/* Explicit Upload Button (Optional) */}
+               <Button variant="outline" size="sm" className="mt-4" onClick={() => fileInputRef.current?.click()}>
+                <UploadCloud className="mr-2 h-4 w-4" /> Change Photo
+              </Button>
             </CardContent>
           </Card>
           <Card className="shadow-lg">
@@ -178,7 +234,8 @@ export default function ProfilePage() {
                       <FormItem>
                         <FormLabel><Mail className="inline mr-2 h-4 w-4 text-muted-foreground"/>Email Address</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} disabled />
+                           {/* Display email from state, not directly from form field */}
+                           <Input type="email" value={userProfile.email} disabled />
                         </FormControl>
                         <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
                         <FormMessage />

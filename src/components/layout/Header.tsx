@@ -37,6 +37,15 @@ const resourcesDropdownLinks = [
 const appNavLink = { href: '/analyze', label: 'Analyze Content', icon: Sparkles };
 const dashboardLink = { href: '/dashboard', label: 'Dashboard', icon: BarChartHorizontalBig };
 
+// Default user structure if localStorage is empty or invalid
+const defaultUser = {
+  name: "Guest",
+  email: "",
+  avatarDataUrl: null, // No default avatar image, rely on fallback
+  bio: "",
+  plan: "Free", 
+};
+
 
 export function Header() {
   const pathname = usePathname();
@@ -50,48 +59,66 @@ export function Header() {
   const [userName, setUserName] = React.useState<string>('');
 
 
-  React.useEffect(() => {
+  // Function to update user state from localStorage or defaults
+   const updateUserState = React.useCallback(() => {
     if (typeof window !== "undefined") {
-      const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(loggedInStatus);
-      if (loggedInStatus) {
-        const storedProfile = localStorage.getItem('userProfile');
-        if (storedProfile) {
-          const profile = JSON.parse(storedProfile);
-          setUserAvatar(profile.avatarDataUrl);
-          setUserName(profile.name);
+        const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+        setIsLoggedIn(loggedInStatus);
+
+        if (loggedInStatus) {
+            const storedProfile = localStorage.getItem('userProfile');
+            if (storedProfile) {
+                try {
+                    const profile = JSON.parse(storedProfile);
+                     // Validate profile structure or use defaults
+                    setUserAvatar(profile.avatarDataUrl || defaultUser.avatarDataUrl);
+                    setUserName(profile.name || defaultUser.name);
+                } catch (e) {
+                    console.error("Failed to parse profile, using defaults.", e);
+                    setUserAvatar(defaultUser.avatarDataUrl);
+                    setUserName(defaultUser.name);
+                }
+            } else {
+                // Logged in, but no profile? Use defaults. Should ideally not happen.
+                 setUserAvatar(defaultUser.avatarDataUrl);
+                 setUserName(defaultUser.name);
+            }
+        } else {
+            setUserAvatar(null);
+            setUserName('');
         }
-      } else {
-        setUserAvatar(null);
-        setUserName('');
-      }
-
-      // Listen for storage changes to update header state (e.g., after profile update)
-      const handleStorageChange = () => {
-        const updatedLoggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-        setIsLoggedIn(updatedLoggedInStatus);
-         if (updatedLoggedInStatus) {
-           const updatedProfile = localStorage.getItem('userProfile');
-           if (updatedProfile) {
-            const profile = JSON.parse(updatedProfile);
-            setUserAvatar(profile.avatarDataUrl);
-            setUserName(profile.name);
-           } else {
-             // Default user if profile somehow gets cleared but still logged in
-             setUserAvatar(null);
-             setUserName('');
-           }
-         } else {
-           setUserAvatar(null);
-           setUserName('');
-         }
-      };
-
-      window.addEventListener('storage', handleStorageChange);
-      return () => window.removeEventListener('storage', handleStorageChange);
-
     }
-  }, [pathname]); // Re-check on pathname change for SPA behavior after login/logout/profile update
+   }, []); // Empty dependency array means this function definition doesn't change
+
+    // Initial load and listen for storage changes
+    React.useEffect(() => {
+        updateUserState(); // Initial check
+
+        const handleStorageChange = (event: StorageEvent) => {
+            // Update state if relevant keys change in localStorage
+            if (event.key === 'isLoggedIn' || event.key === 'userProfile') {
+                updateUserState();
+            }
+        };
+        
+        // Also listen for custom profile update events
+         const handleProfileUpdate = (event: CustomEvent) => {
+            if (event.detail) {
+                setUserAvatar(event.detail.avatarDataUrl || defaultUser.avatarDataUrl);
+                setUserName(event.detail.name || defaultUser.name);
+            } else {
+                 updateUserState(); // Fallback to reading localStorage again if no detail
+            }
+         };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('profileUpdated', handleProfileUpdate as EventListener); 
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('profileUpdated', handleProfileUpdate as EventListener);
+        };
+    }, [pathname, updateUserState]); // Re-check on pathname change and if updateUserState definition changes (it shouldn't)
 
 
   const handleLogout = () => {
@@ -147,7 +174,7 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label="ContentAI Home"> {/* Removed hover:scale-105 */}
+        <Link href="/" className="flex items-center gap-2" aria-label="ContentAI Home"> 
           <Image src="/logo.svg" alt="ContentAI Logo" width={36} height={36} /> 
           <span className="text-2xl font-bold tracking-tight text-foreground">
             Content<span className="text-primary">AI</span>
@@ -155,14 +182,14 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 md:flex"> {/* Reduced gap for more items */}
+        <nav className="hidden items-center gap-1 md:flex"> 
           {navLinksToDisplay.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium text-muted-foreground transition-colors hover:text-primary px-3 py-2 rounded-md", // Added padding & rounded
-                pathname === link.href && "text-primary bg-accent/20" // Softer accent for active link
+                "text-sm font-medium text-muted-foreground transition-colors hover:text-primary px-3 py-2 rounded-md", 
+                pathname === link.href && "text-primary bg-accent/20" 
               )}
             >
               {link.label}
@@ -304,7 +331,7 @@ export function Header() {
                     Content<span className="text-primary">AI</span>
                  </span>
               </div>
-              <nav className="flex flex-col gap-1"> {/* Reduced gap for more items */}
+              <nav className="flex flex-col gap-1"> 
                 {mobileNavLinks.map((link) => {
                   if ((link as any).isDropdown) { // Dropdown for mobile too
                     return (
@@ -358,3 +385,4 @@ export function Header() {
     </motion.header>
   );
 }
+
