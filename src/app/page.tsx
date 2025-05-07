@@ -7,14 +7,14 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { PricingSection } from '@/components/landing/PricingSection';
 import { CallToActionSection } from '@/components/landing/CallToActionSection';
-import { TourProvider } from '@/components/tour/TourProvider';
+// TourProvider removed from here
 import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
 
 
 export default function HomePage() {
 
   return (
-    <TourProvider>
+    // TourProvider removed from here
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="flex-grow">
@@ -26,6 +26,7 @@ export default function HomePage() {
         <ChatbotWidget />
         <Footer />
       </div>
-    </TourProvider>
+    // TourProvider removed from here
   );
 }
+
