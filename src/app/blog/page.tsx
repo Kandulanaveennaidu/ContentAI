@@ -9,59 +9,8 @@ import { ArrowRight, CalendarDays, UserCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const blogPosts = [
-  {
-    slug: "ai-in-content-creation-trends",
-    title: "Top AI Trends Shaping Content Creation in 2024",
-    date: "October 26, 2023",
-    author: "Dr. Lexi Data",
-    excerpt: "Artificial intelligence is no longer a futuristic concept but a present-day tool revolutionizing how we create and consume content. Explore the top trends...",
-    imageSrc: "https://picsum.photos/seed/blogai/400/250",
-    imageHint: "futuristic AI technology",
-    tags: ["AI", "Content Creation", "Trends"]
-  },
-  {
-    slug: "mastering-readability-for-engagement",
-    title: "Mastering Readability: Keys to Unlocking Higher Engagement",
-    date: "October 15, 2023",
-    author: "ContentAI Team",
-    excerpt: "Discover why readability is crucial for audience engagement and learn practical tips to improve your Flesch-Kincaid scores using ContentAI.",
-    imageSrc: "https://picsum.photos/seed/blogread/400/250",
-    imageHint: "person reading book",
-    tags: ["Readability", "Engagement", "Writing Tips"]
-  },
-  {
-    slug: "predictive-analytics-content-strategy",
-    title: "How Predictive Analytics Can Supercharge Your Content Strategy",
-    date: "September 28, 2023",
-    author: "Mark Strategist",
-    excerpt: "Move beyond guesswork. Learn how ContentAI's engagement prediction helps you make data-driven decisions for a more effective content strategy.",
-    imageSrc: "https://picsum.photos/seed/blogpredict/400/250",
-    imageHint: "data analytics chart",
-    tags: ["Predictive Analytics", "Content Strategy", "Data"]
-  },
-   {
-    slug: "future-of-seo-with-ai",
-    title: "The Future of SEO: How AI is Changing the Game",
-    date: "November 5, 2023",
-    author: "Serena Search",
-    excerpt: "SEO is constantly evolving, and AI is at the forefront of this change. Understand how AI tools like ContentAI can help you stay ahead.",
-    imageSrc: "https://picsum.photos/seed/blogseo/400/250",
-    imageHint: "search engine optimization",
-    tags: ["SEO", "AI", "Digital Marketing"]
-  },
-  {
-    slug: "case-study-boosting-conversion",
-    title: "Case Study: How Company X Boosted Conversions by 30% with ContentAI",
-    date: "November 12, 2023",
-    author: "Client Success Team",
-    excerpt: "A deep dive into how one of our clients utilized ContentAI to refine their messaging and achieve significant improvements in conversion rates.",
-    imageSrc: "https://picsum.photos/seed/blogcase/400/250",
-    imageHint: "success graph arrow",
-    tags: ["Case Study", "Conversion Optimization", "Success Story"]
-  },
-];
+import type { BlogPost } from '@/lib/blog-data'; // Import BlogPost type
+import { blogPosts } from '@/lib/blog-data'; // Import blogPosts data
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -102,7 +51,7 @@ export default function BlogPage() {
             initial="hidden"
             animate="visible"
           >
-            {blogPosts.map((post) => (
+            {blogPosts.map((post: BlogPost) => ( // Ensure post is typed as BlogPost
               <motion.div key={post.slug} variants={itemVariants}>
                 <Card className="h-full flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader className="p-0">
