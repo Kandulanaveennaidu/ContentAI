@@ -5,16 +5,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Sparkles } from 'lucide-react';
+import { Menu, Sparkles, Info } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
+import { motion } from 'framer-motion';
 
-const navLinks = [
+const mainNavLinks = [
   { href: '/#features', label: 'Features' },
   { href: '/#pricing', label: 'Pricing' },
-  { href: '/analyze', label: 'Analyze Content', cta: true }, // Special link for app
+  { href: '/about', label: 'About Us' },
 ];
+
+const appNavLink = { href: '/analyze', label: 'Analyze Content', cta: true };
+
 
 const authLinks = [
   { href: '/login', label: 'Login' },
@@ -24,6 +28,7 @@ const authLinks = [
 export function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -34,13 +39,20 @@ export function Header() {
   }, []);
 
   const isAppPage = pathname.startsWith('/analyze');
+  
+  const navLinksToDisplay = isAppPage ? [] : mainNavLinks;
+  const mobileNavLinks = isAppPage ? [appNavLink] : [...mainNavLinks, appNavLink];
+
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 120, damping: 20 }}
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
         isScrolled || isAppPage ? "bg-background/80 backdrop-blur-md shadow-md" : "bg-transparent",
-        isAppPage && !isScrolled && "bg-background shadow-sm"
+        isAppPage && !isScrolled && "bg-background shadow-sm" 
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
@@ -53,15 +65,19 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
-          {(isAppPage ? [] : navLinks.filter(link => !link.cta)).map((link) => (
+          {navLinksToDisplay.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className={cn(
+                "text-sm font-medium text-muted-foreground transition-colors hover:text-primary",
+                pathname === link.href && "text-primary"
+              )}
             >
               {link.label}
             </Link>
           ))}
+
           {isAppPage ? (
              <Link href="/analyze" passHref>
                 <Button variant="default" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
@@ -70,15 +86,14 @@ export function Header() {
                 </Button>
               </Link>
           ) : (
-            navLinks.filter(link => link.cta).map(link => (
-              <Link key={link.href} href={link.href} passHref>
+              <Link href={appNavLink.href} passHref>
                 <Button variant="default" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {link.label}
+                  {appNavLink.label}
                 </Button>
               </Link>
-            ))
           )}
+
           <div className="h-6 w-px bg-border" />
           {authLinks.map((link) => (
             <Link key={link.href} href={link.href} passHref>
@@ -91,7 +106,7 @@ export function Header() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden">
-          <Sheet>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-4" />
@@ -106,30 +121,24 @@ export function Header() {
                  </span>
               </div>
               <nav className="flex flex-col gap-4">
-                {(isAppPage ? [] : navLinks).map((link) => (
+                {mobileNavLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "text-sm font-medium transition-colors hover:text-primary",
-                      link.cta ? "text-primary font-semibold" : "text-muted-foreground"
+                      "text-base font-medium transition-colors hover:text-primary py-2",
+                      link.cta ? "text-primary font-semibold" : "text-muted-foreground",
+                       pathname === link.href && (link.cta ? "text-primary brightness-110" : "text-primary")
                     )}
                   >
                     {link.label}
                   </Link>
                 ))}
-                {isAppPage && (
-                  <Link
-                    href="/analyze"
-                    className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                  >
-                    Dashboard
-                  </Link>
-                )}
                 <hr className="my-2 border-border" />
                 {authLinks.map((link) => (
                   <Link key={link.href} href={link.href} passHref>
-                    <Button variant={link.primary ? 'default' : 'outline'} className="w-full">
+                    <Button variant={link.primary ? 'default' : 'outline'} className="w-full" onClick={() => setMobileMenuOpen(false)}>
                       {link.label}
                     </Button>
                   </Link>
@@ -139,6 +148,6 @@ export function Header() {
           </Sheet>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

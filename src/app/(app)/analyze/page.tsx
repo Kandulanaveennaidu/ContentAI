@@ -1,17 +1,19 @@
 // src/app/(app)/analyze/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Lightbulb, BarChart3, BookOpen, Sparkles } from 'lucide-react';
+import { Loader2, Lightbulb, BarChart3, BookOpen, Sparkles, History, Eye, RefreshCw, Trash2, AlertTriangle } from 'lucide-react';
 import { analyzeReadability, type ReadabilityAnalysisOutput } from '@/ai/flows/readability-analysis';
 import { engagementPrediction, type EngagementPredictionOutput } from '@/ai/flows/engagement-prediction';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { format } from 'date-fns';
 
 interface AnalysisResultCardProps {
   title: string;
@@ -21,7 +23,7 @@ interface AnalysisResultCardProps {
 }
 
 const AnalysisResultCard: React.FC<AnalysisResultCardProps> = ({ title, icon: Icon, children, isLoading }) => (
-  <Card className="shadow-lg_ transition-all duration-300 hover:shadow-xl">
+  <Card className="shadow-lg transition-all duration-300 hover:shadow-xl h-full">
     <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
       <Icon className="h-6 w-6 text-primary" />
       <CardTitle className="text-lg font-semibold">{title}</CardTitle>
@@ -38,6 +40,16 @@ const AnalysisResultCard: React.FC<AnalysisResultCardProps> = ({ title, icon: Ic
   </Card>
 );
 
+type StoredAnalysis = {
+  id: string;
+  timestamp: number;
+  content: string;
+  readabilityResult: ReadabilityAnalysisOutput | null;
+  engagementResult: EngagementPredictionOutput | null;
+};
+
+const MAX_HISTORY_ITEMS = 10;
+const LOCAL_STORAGE_KEY = 'contentAnalysisHistory';
 
 export default function AnalyzePage() {
   const [content, setContent] = useState('');
@@ -48,6 +60,23 @@ export default function AnalyzePage() {
   const [engagementResult, setEngagementResult] = useState<EngagementPredictionOutput | null>(null);
   
   const [progress, setProgress] = useState(0);
+  const [analysisHistory, setAnalysisHistory] = useState<StoredAnalysis[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedHistory) {
+        setAnalysisHistory(JSON.parse(storedHistory));
+      }
+    }
+  }, []);
+
+  const saveHistory = useCallback((newHistory: StoredAnalysis[]) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newHistory));
+    }
+    setAnalysisHistory(newHistory);
+  }, []);
 
   useEffect(() => {
     if (isLoading) {
@@ -60,9 +89,8 @@ export default function AnalyzePage() {
     }
   }, [isLoading]);
 
-
-  const handleAnalyze = async () => {
-    if (!content.trim()) {
+  const handleAnalyze = async (contentToAnalyze: string = content) => {
+    if (!contentToAnalyze.trim()) {
       setError("Content cannot be empty.");
       return;
     }
@@ -73,8 +101,8 @@ export default function AnalyzePage() {
     setProgress(10);
 
     try {
-      const readabilityPromise = analyzeReadability({ content });
-      const engagementPromise = engagementPrediction({ content });
+      const readabilityPromise = analyzeReadability({ content: contentToAnalyze });
+      const engagementPromise = engagementPrediction({ content: contentToAnalyze });
 
       const [readabilityData, engagementData] = await Promise.all([readabilityPromise, engagementPromise]);
       
@@ -82,6 +110,16 @@ export default function AnalyzePage() {
       setProgress(50);
       setEngagementResult(engagementData);
       setProgress(100);
+
+      // Save to history
+      const newAnalysis: StoredAnalysis = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        content: contentToAnalyze,
+        readabilityResult: readabilityData,
+        engagementResult: engagementData,
+      };
+      saveHistory([newAnalysis, ...analysisHistory].slice(0, MAX_HISTORY_ITEMS));
 
     } catch (err) {
       console.error("Analysis error:", err);
@@ -102,20 +140,60 @@ export default function AnalyzePage() {
     return "Very Difficult (College Graduate)";
   };
 
+  const handleViewHistoryItem = (item: StoredAnalysis) => {
+    setContent(item.content);
+    setReadabilityResult(item.readabilityResult);
+    setEngagementResult(item.engagementResult);
+    setError(null);
+    // Scroll to top or analysis section might be good UX here
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleReanalyzeHistoryItem = (item: StoredAnalysis) => {
+    setContent(item.content);
+    handleAnalyze(item.content);
+  };
+
+  const handleDeleteHistoryItem = (id: string) => {
+    const updatedHistory = analysisHistory.filter(item => item.id !== id);
+    saveHistory(updatedHistory);
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  const historyItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20, transition: { duration: 0.3 } }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
       >
         <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          <motion.h1 
+            className="text-4xl font-bold tracking-tight text-foreground"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             Content <span className="text-primary">Analyzer</span>
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          </motion.h1>
+          <motion.p 
+            className="mt-2 text-lg text-muted-foreground"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Paste your text below to get AI-powered readability and engagement insights.
-          </p>
+          </motion.p>
         </header>
 
         <Card className="mb-8 shadow-xl">
@@ -129,7 +207,7 @@ export default function AnalyzePage() {
               disabled={isLoading}
             />
             <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Button onClick={handleAnalyze} disabled={isLoading || !content.trim()} className="w-full sm:w-auto">
+              <Button onClick={() => handleAnalyze()} disabled={isLoading || !content.trim()} className="w-full sm:w-auto">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -157,6 +235,7 @@ export default function AnalyzePage() {
             </div>
             {error && (
               <Alert variant="destructive" className="mt-4">
+                <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
@@ -167,9 +246,10 @@ export default function AnalyzePage() {
 
       {(readabilityResult || engagementResult || isLoading) && (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.2 }}
       >
         <Tabs defaultValue="readability" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:w-1/2 mx-auto mb-6">
@@ -188,14 +268,16 @@ export default function AnalyzePage() {
                   </div>
                   <div>
                     <h3 className="text-md font-medium text-muted-foreground mb-1">Suggestions for Improvement:</h3>
-                    <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
-                      {readabilityResult.suggestions.map((tip, index) => (
-                        <li key={index} className="flex items-start">
-                          <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
-                          <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <ScrollArea className="h-40">
+                      <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+                        {readabilityResult.suggestions.map((tip, index) => (
+                          <li key={index} className="flex items-start">
+                            <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </ScrollArea>
                   </div>
                 </div>
               ) : (
@@ -214,14 +296,16 @@ export default function AnalyzePage() {
                   </div>
                   <div>
                     <h3 className="text-md font-medium text-muted-foreground mb-1">Actionable Tips:</h3>
-                    <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
-                      {engagementResult.actionableTips.map((tip, index) => (
-                        <li key={index} className="flex items-start">
-                           <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
-                           <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
+                     <ScrollArea className="h-40">
+                        <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+                          {engagementResult.actionableTips.map((tip, index) => (
+                            <li key={index} className="flex items-start">
+                               <Lightbulb className="mr-2 mt-0.5 h-4 w-4 shrink-0 text-accent-foreground" />
+                               <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                    </ScrollArea>
                   </div>
                 </div>
               ) : (
@@ -232,6 +316,83 @@ export default function AnalyzePage() {
         </Tabs>
       </motion.div>
       )}
+
+      {/* Analysis History Section */}
+      <motion.div
+        className="mt-12"
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ delay: 0.4 }}
+      >
+        <Card className="shadow-xl">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <History className="h-6 w-6 text-primary" />
+              <CardTitle>Analysis History</CardTitle>
+            </div>
+            <CardDescription>View, re-analyze, or delete your past content analyses. Up to {MAX_HISTORY_ITEMS} items are stored.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {analysisHistory.length > 0 ? (
+              <ScrollArea className="h-[400px] pr-4">
+                <ul className="space-y-4">
+                  <AnimatePresence>
+                  {analysisHistory.map((item) => (
+                    <motion.li 
+                      key={item.id}
+                      layout
+                      variants={historyItemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >
+                      <Card className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-sm font-medium text-foreground truncate max-w-xs sm:max-w-md md:max-w-lg" title={item.content}>
+                                {item.content.substring(0, 100)}{item.content.length > 100 ? '...' : ''}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Analyzed on: {format(new Date(item.timestamp), "MMM d, yyyy 'at' h:mm a")}
+                              </p>
+                            </div>
+                            <div className="flex space-x-2 shrink-0 ml-2">
+                              <Button variant="ghost" size="icon" onClick={() => handleViewHistoryItem(item)} title="View Details">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleReanalyzeHistoryItem(item)} title="Re-analyze">
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteHistoryItem(item.id)} title="Delete">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                          {(item.readabilityResult || item.engagementResult) && (
+                            <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                              {item.readabilityResult && (
+                                <p>Readability: <span className="font-semibold text-primary">{item.readabilityResult.fleschKincaidScore.toFixed(1)}</span></p>
+                              )}
+                              {item.engagementResult && (
+                                <p>Engagement: <span className="font-semibold text-primary capitalize">{item.engagementResult.predictedEngagement}</span></p>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.li>
+                  ))}
+                  </AnimatePresence>
+                </ul>
+              </ScrollArea>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">No analysis history yet. Your analyses will appear here.</p>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

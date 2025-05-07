@@ -24,7 +24,7 @@ body {
     --secondary-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
 
     --muted: 0 0% 85%; /* Medium gray for muted elements */
-    --muted-foreground: 210 29% 35%; /* Slightly lighter Dark Blue for muted text */
+    --muted-foreground: 210 29% 30%; /* Darker Dark Blue for muted text for better contrast */
 
     --accent: 168 76% 85%; /* Lighter Teal for hover/secondary highlights */
     --accent-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
@@ -65,13 +65,13 @@ body {
     --popover-foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
 
     --primary: 168 76% 50%; /* Brighter Teal for dark mode */
-    --primary-foreground: 210 29% 10%; /* Dark text on bright Teal */
+    --primary-foreground: 0 0% 100%; /* White text on bright Teal for dark mode */
 
     --secondary: 210 29% 22%; /* Darker blue for secondary elements */
     --secondary-foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
 
     --muted: 210 29% 25%; /* Muted dark blue */
-    --muted-foreground: 0 0% 65%; /* Lighter gray for muted text */
+    --muted-foreground: 0 0% 75%; /* Adjusted for better visibility in dark mode */
 
     --accent: 168 76% 35%; /* Darker Teal for accent */
     --accent-foreground: 0 0% 98%; /* Very light gray/white */
@@ -122,4 +122,11 @@ body {
 
 .animate-fadeIn {
   animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Staggered fade-in animation */
+.animate-fadeInStagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.6s ease-out forwards;
 }
