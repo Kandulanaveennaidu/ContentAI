@@ -12,7 +12,7 @@ interface TourStep {
   title: string;
   content: string;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  
+
 }
 
 interface TourContextType {
@@ -27,7 +27,7 @@ interface TourContextType {
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
 
-const TOUR_COMPLETED_KEY = 'appTourCompleted';
+const TOUR_COMPLETED_KEY_PREFIX = 'appTourCompleted_'; // Prefix for tour keys
 
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [steps, setSteps] = useState<TourStep[]>([]);
@@ -35,22 +35,34 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isTourActive, setIsTourActive] = useState(false);
   const [highlightedElementRect, setHighlightedElementRect] = useState<DOMRect | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [currentTourKey, setCurrentTourKey] = useState<string | null>(null);
 
 
   useEffect(() => {
     setIsMounted(true);
-    // Logic for checking TOUR_COMPLETED_KEY and deciding whether to auto-start a tour
-    // is now primarily handled by the components that initiate the tour (e.g., AnalyzePage)
-    // by conditionally calling startTour.
   }, []);
 
 
-  const startTour = useCallback((tourSteps: TourStep[]) => {
-    // The check for TOUR_COMPLETED_KEY before starting is expected to be done by the caller.
-    // If this provider were to manage a global app tour, that check could live here.
-    setSteps(tourSteps);
-    setCurrentStepIndex(0);
-    setIsTourActive(true);
+  const startTour = useCallback((tourSteps: TourStep[], tourId: string) => {
+    const fullTourKey = `${TOUR_COMPLETED_KEY_PREFIX}${tourId}`;
+    setCurrentTourKey(fullTourKey); // Store the key for ending the tour
+
+    if (typeof window !== 'undefined') {
+        const tourCompleted = localStorage.getItem(fullTourKey) === 'true';
+        if (!tourCompleted) {
+            setSteps(tourSteps);
+            setCurrentStepIndex(0);
+            setIsTourActive(true);
+        } else {
+            // console.log(`Tour ${tourId} already completed.`);
+        }
+    } else {
+         // Default behavior if window is not defined (e.g., SSR, though unlikely for startTour)
+         // Proceed with the tour, localStorage check will happen on client
+         setSteps(tourSteps);
+         setCurrentStepIndex(0);
+         setIsTourActive(true);
+    }
   }, []);
 
   const endTour = useCallback(() => {
@@ -58,10 +70,12 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSteps([]);
     setCurrentStepIndex(0);
     setHighlightedElementRect(null);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
+    if (typeof window !== 'undefined' && currentTourKey) {
+      localStorage.setItem(currentTourKey, 'true'); // Use the stored key
+      // console.log(`Marked tour ${currentTourKey} as completed.`);
     }
-  }, []);
+     setCurrentTourKey(null); // Reset the current tour key
+  }, [currentTourKey]);
 
   const nextStep = useCallback(() => {
     if (currentStepIndex < steps.length - 1) {
@@ -85,7 +99,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (element) {
         const rect = element.getBoundingClientRect();
         setHighlightedElementRect(rect);
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Debounce or use a slight delay for scrolling to avoid race conditions
+        const scrollTimeout = setTimeout(() => {
+             element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        }, 100); // Small delay
+         return () => clearTimeout(scrollTimeout); // Cleanup timeout on step change
       } else {
         console.warn(`Tour target element not found: ${currentStep.target}`);
         setHighlightedElementRect(null); // Target not found
@@ -107,22 +125,95 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const placement = currentStep.placement || 'bottom';
     const offset = 10; // space between element and tooltip
-    
+    const tooltipWidth = 320; // Estimated tooltip width (w-80)
+    const tooltipHeight = 200; // Estimated tooltip height (adjust as needed)
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let top = highlightedElementRect.top + highlightedElementRect.height / 2;
+    let left = highlightedElementRect.left + highlightedElementRect.width / 2;
+    let transform = 'translate(-50%, -50%)'; // Default center alignment
+    let finalPosition: 'fixed' | 'absolute' = 'fixed'; // Use fixed by default
+
     switch (placement) {
-      case 'top':
-        return { bottom: window.innerHeight - highlightedElementRect.top + offset, left: highlightedElementRect.left + highlightedElementRect.width / 2, transform: 'translateX(-50%)', position: 'fixed' as 'fixed' };
-      case 'bottom':
-        return { top: highlightedElementRect.bottom + offset, left: highlightedElementRect.left + highlightedElementRect.width / 2, transform: 'translateX(-50%)', position: 'fixed' as 'fixed' };
-      case 'left':
-        return { top: highlightedElementRect.top + highlightedElementRect.height / 2, right: window.innerWidth - highlightedElementRect.left + offset, transform: 'translateY(-50%)', position: 'fixed' as 'fixed' };
-      case 'right':
-        return { top: highlightedElementRect.top + highlightedElementRect.height / 2, left: highlightedElementRect.right + offset, transform: 'translateY(-50%)', position: 'fixed' as 'fixed' };
-      default: // center or fallback
-        return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'fixed' as 'fixed' };
+        case 'top':
+            top = highlightedElementRect.top - offset;
+            transform = 'translate(-50%, -100%)';
+            // Adjust if too close to top edge
+            if (top - tooltipHeight < 0) {
+                top = highlightedElementRect.bottom + offset;
+                transform = 'translate(-50%, 0%)'; // Switch to bottom
+            }
+            break;
+        case 'bottom':
+            top = highlightedElementRect.bottom + offset;
+            transform = 'translate(-50%, 0%)';
+             // Adjust if too close to bottom edge
+            if (top + tooltipHeight > windowHeight) {
+                top = highlightedElementRect.top - offset;
+                transform = 'translate(-50%, -100%)'; // Switch to top
+            }
+            break;
+        case 'left':
+            left = highlightedElementRect.left - offset;
+            transform = 'translate(-100%, -50%)';
+             // Adjust if too close to left edge
+            if (left - tooltipWidth < 0) {
+                left = highlightedElementRect.right + offset;
+                transform = 'translate(0%, -50%)'; // Switch to right
+            }
+            break;
+        case 'right':
+            left = highlightedElementRect.right + offset;
+            transform = 'translate(0%, -50%)';
+             // Adjust if too close to right edge
+            if (left + tooltipWidth > windowWidth) {
+                 left = highlightedElementRect.left - offset;
+                 transform = 'translate(-100%, -50%)'; // Switch to left
+            }
+            break;
+        default: // center or fallback
+            top = windowHeight / 2;
+            left = windowWidth / 2;
+            break;
     }
+     // Final check for horizontal overflow if placed top/bottom
+     if (placement === 'top' || placement === 'bottom') {
+         if (left - tooltipWidth / 2 < 0) { // Too close to left edge
+             left = offset;
+             transform = placement === 'top' ? 'translate(0%, -100%)' : 'translate(0%, 0%)';
+         } else if (left + tooltipWidth / 2 > windowWidth) { // Too close to right edge
+             left = windowWidth - offset;
+             transform = placement === 'top' ? 'translate(-100%, -100%)' : 'translate(-100%, 0%)';
+         }
+     }
+
+     // Final check for vertical overflow if placed left/right
+     if (placement === 'left' || placement === 'right') {
+          if (top - tooltipHeight / 2 < 0) { // Too close to top edge
+             top = offset;
+             transform = placement === 'left' ? 'translate(-100%, 0%)' : 'translate(0%, 0%)';
+          } else if (top + tooltipHeight / 2 > windowHeight) { // Too close to bottom edge
+             top = windowHeight - offset;
+              transform = placement === 'left' ? 'translate(-100%, -100%)' : 'translate(0%, -100%)';
+          }
+     }
+
+
+    return { top: `${top}px`, left: `${left}px`, transform, position: finalPosition };
   };
 
-  const contextValue = { startTour, nextStep, prevStep, endTour, currentStepIndex, isTourActive, currentStep };
+  // Provide a stable context value using useMemo
+    const contextValue = React.useMemo(() => ({
+        startTour,
+        nextStep,
+        prevStep,
+        endTour,
+        currentStepIndex,
+        isTourActive,
+        currentStep
+    }), [startTour, nextStep, prevStep, endTour, currentStepIndex, isTourActive, currentStep]);
+
 
   return (
     <TourContext.Provider value={contextValue}>
@@ -145,7 +236,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 <motion.div
                     key="tour-highlight"
                     initial={{ opacity: 0 }}
-                    animate={{ 
+                    animate={{
                         opacity: 1,
                         x: highlightedElementRect.left - 5, // 5px padding
                         y: highlightedElementRect.top - 5,
@@ -153,10 +244,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         height: highlightedElementRect.height + 10,
                     }}
                     exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut"}} // Smoother transition
                     className="fixed rounded-md border-2 border-primary shadow-2xl z-[9999] pointer-events-none"
                     style={{
                       boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)', // "Cutout" effect
-                      borderColor: 'hsl(var(--primary))', 
+                      borderColor: 'hsl(var(--primary))',
                     }}
                  />
             )}
@@ -174,7 +266,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
               <Card className="shadow-2xl">
                 <CardHeader>
                   <CardTitle>{currentStep.title}</CardTitle>
-                  {steps.length > 1 && <CardDescription>Step {currentStepIndex + 1} of {steps.length}</CardDescription>}
+                  {/* Removed Step Count Description */}
+                  {/* {steps.length > 1 && <CardDescription>Step {currentStepIndex + 1} of {steps.length}</CardDescription>} */}
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">{currentStep.content}</p>
@@ -210,4 +303,3 @@ export const useTour = () => {
   }
   return context;
 };
-
