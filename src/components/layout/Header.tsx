@@ -65,6 +65,31 @@ export function Header() {
         setUserAvatar(null);
         setUserName('');
       }
+
+      // Listen for storage changes to update header state (e.g., after profile update)
+      const handleStorageChange = () => {
+        const updatedLoggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+        setIsLoggedIn(updatedLoggedInStatus);
+         if (updatedLoggedInStatus) {
+           const updatedProfile = localStorage.getItem('userProfile');
+           if (updatedProfile) {
+            const profile = JSON.parse(updatedProfile);
+            setUserAvatar(profile.avatarDataUrl);
+            setUserName(profile.name);
+           } else {
+             // Default user if profile somehow gets cleared but still logged in
+             setUserAvatar(null);
+             setUserName('');
+           }
+         } else {
+           setUserAvatar(null);
+           setUserName('');
+         }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+
     }
   }, [pathname]); // Re-check on pathname change for SPA behavior after login/logout/profile update
 
@@ -122,8 +147,8 @@ export function Header() {
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105" aria-label="ContentAI Home">
-          <Image src="/logo.svg" alt="ContentAI Logo" width={36} height={36} /> {/* Updated size */}
+        <Link href="/" className="flex items-center gap-2" aria-label="ContentAI Home"> {/* Removed hover:scale-105 */}
+          <Image src="/logo.svg" alt="ContentAI Logo" width={36} height={36} /> 
           <span className="text-2xl font-bold tracking-tight text-foreground">
             Content<span className="text-primary">AI</span>
           </span>
@@ -286,6 +311,7 @@ export function Header() {
                       <DropdownMenu key={link.label}>
                         <DropdownMenuTrigger asChild>
                            <Button variant="ghost" className="w-full justify-start text-base font-medium text-muted-foreground hover:text-primary py-2 flex items-center">
+                            {/* Check if link.icon exists before creating element */}
                             {link.icon && React.createElement(link.icon, { className: "mr-2 h-5 w-5"})}
                             {link.label} <ChevronDown className="ml-auto h-4 w-4"/>
                            </Button>

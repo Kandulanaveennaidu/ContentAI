@@ -41,7 +41,6 @@ const pricingPlans = [
     features: ['All Pro Features', 'Team Collaboration Tools', 'Shared Workspaces', 'Dedicated Account Manager'],
     cta: 'Choose Team',
     href: '/signup?plan=team', // For direct signup link
-    popular: true,
   },
 ];
 
@@ -56,8 +55,13 @@ const cardVariants = {
       ease: "easeOut"
     }
   }),
-  hover: { scale: 1.03, boxShadow: "0px 10px 30px -5px var(--tw-shadow-color, rgba(0,0,0,0.1))", transition: {type: "spring", stiffness: 300 }}
+  hover: { 
+    y: -5, // Changed from scale to y-translate for smoother feel
+    boxShadow: "0px 10px 20px rgba(var(--foreground), 0.1)", // Adjusted shadow color source
+    transition: { type: "spring", stiffness: 300, damping: 20 } // Adjusted damping
+  } 
 };
+
 
 const PayPalIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="text-blue-600">
@@ -150,7 +154,8 @@ export function PricingSection() {
         <motion.div 
           className="grid grid-cols-1 gap-8 md:grid-cols-3"
           initial="hidden"
-          animate="visible" // Changed to animate to ensure it runs once
+          whileInView="visible" // Changed to whileInView to trigger on scroll
+          viewport={{ once: true, amount: 0.2 }} // Trigger animation when 20% is visible
           variants={{ visible: { transition: { staggerChildren: 0.1 }}}}
         >
           {pricingPlans.map((plan, index) => (
@@ -162,7 +167,7 @@ export function PricingSection() {
               className="h-full"
             >
               <Card 
-                className={`flex flex-col h-full transition-all duration-300 ${plan.popular ? 'border-primary border-2 relative shadow-primary/20' : 'shadow-lg'} `}
+                className={`flex flex-col h-full transition-shadow duration-300 ${plan.popular ? 'border-primary border-2 relative shadow-primary/20' : 'shadow-lg'} `}
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-md">
