@@ -10,6 +10,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'; // Import useRouter
+import { useToast } from '@/hooks/use-toast'; // Import useToast
+
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -20,6 +23,9 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
+  const router = useRouter(); // Initialize useRouter
+  const { toast } = useToast(); // Initialize useToast
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -32,6 +38,15 @@ export default function SignupPage() {
   function onSubmit(data: SignupFormValues) {
     console.log(data);
     // Handle signup logic here
+    // For demonstration, set a localStorage item to simulate login
+    if (typeof window !== "undefined") {
+        localStorage.setItem('isLoggedIn', 'true');
+    }
+     toast({
+        title: "Account Created!",
+        description: "Welcome to ContentAI! You are now logged in.",
+    });
+    router.push('/dashboard'); // Redirect to dashboard or analyze page
   }
 
   return (

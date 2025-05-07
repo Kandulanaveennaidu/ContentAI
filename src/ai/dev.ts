@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/engagement-prediction.ts';
 import '@/ai/flows/readability-analysis.ts';
+import '@/ai/flows/chatbot-flow.ts';

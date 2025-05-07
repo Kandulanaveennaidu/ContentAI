@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
+import { useTour } from '@/components/tour/TourProvider';
 
 interface AnalysisResultCardProps {
   title: string;
@@ -51,6 +52,34 @@ type StoredAnalysis = {
 const MAX_HISTORY_ITEMS = 10;
 const LOCAL_STORAGE_KEY = 'contentAnalysisHistory';
 
+const analyzePageTourSteps = [
+  {
+    target: '#content-textarea',
+    title: 'Enter Your Content',
+    content: 'Paste or type your text here to begin the analysis.',
+    placement: 'bottom' as const,
+  },
+  {
+    target: '#analyze-button',
+    title: 'Start Analysis',
+    content: 'Click this button to process your content and get insights.',
+    placement: 'bottom' as const,
+  },
+  {
+    target: '#results-tabs',
+    title: 'View Results',
+    content: 'Your readability and engagement scores will appear here in separate tabs.',
+    placement: 'top' as const,
+  },
+  {
+    target: '#history-card',
+    title: 'Analysis History',
+    content: 'Your past analyses are saved here for easy access.',
+    placement: 'top' as const,
+  },
+];
+
+
 export default function AnalyzePage() {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +90,7 @@ export default function AnalyzePage() {
   
   const [progress, setProgress] = useState(0);
   const [analysisHistory, setAnalysisHistory] = useState<StoredAnalysis[]>([]);
+  const { startTour, isTourActive } = useTour();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -68,8 +98,16 @@ export default function AnalyzePage() {
       if (storedHistory) {
         setAnalysisHistory(JSON.parse(storedHistory));
       }
+      
+      // Start tour if not completed
+      const tourCompleted = localStorage.getItem('appTourCompleted');
+      if (tourCompleted !== 'true' && !isTourActive) {
+        // Small delay to ensure DOM elements are ready
+        setTimeout(() => startTour(analyzePageTourSteps), 500);
+      }
     }
-  }, []);
+  }, [startTour, isTourActive]);
+
 
   const saveHistory = useCallback((newHistory: StoredAnalysis[]) => {
     if (typeof window !== 'undefined') {
@@ -199,6 +237,7 @@ export default function AnalyzePage() {
         <Card className="mb-8 shadow-xl">
           <CardContent className="p-6">
             <Textarea
+              id="content-textarea"
               placeholder="Paste your content here..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -207,7 +246,7 @@ export default function AnalyzePage() {
               disabled={isLoading}
             />
             <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Button onClick={() => handleAnalyze()} disabled={isLoading || !content.trim()} className="w-full sm:w-auto">
+              <Button id="analyze-button" onClick={() => handleAnalyze()} disabled={isLoading || !content.trim()} className="w-full sm:w-auto">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -246,6 +285,7 @@ export default function AnalyzePage() {
 
       {(readabilityResult || engagementResult || isLoading) && (
       <motion.div
+        id="results-tabs"
         variants={cardVariants}
         initial="hidden"
         animate="visible"
@@ -319,6 +359,7 @@ export default function AnalyzePage() {
 
       {/* Analysis History Section */}
       <motion.div
+        id="history-card"
         className="mt-12"
         variants={cardVariants}
         initial="hidden"

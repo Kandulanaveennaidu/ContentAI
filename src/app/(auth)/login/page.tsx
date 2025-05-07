@@ -11,6 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'; // Import useRouter
+import { useToast } from '@/hooks/use-toast'; // Import useToast
+
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -20,6 +23,9 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const router = useRouter(); // Initialize useRouter
+  const { toast } = useToast(); // Initialize useToast
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -31,6 +37,15 @@ export default function LoginPage() {
   function onSubmit(data: LoginFormValues) {
     console.log(data);
     // Handle login logic here
+    // For demonstration, set a localStorage item to simulate login
+    if (typeof window !== "undefined") {
+        localStorage.setItem('isLoggedIn', 'true');
+    }
+    toast({
+        title: "Login Successful!",
+        description: "Welcome back!",
+    });
+    router.push('/dashboard'); // Redirect to dashboard or analyze page
   }
 
   return (

@@ -8,95 +8,95 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 94.1%; /* Light Gray #F0F0F0 */
-    --foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
+    --background: 220 50% 98%; /* Very light cool gray */
+    --foreground: 225 30% 20%; /* Deep cool navy */
 
     --card: 0 0% 100%; /* White */
-    --card-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
+    --card-foreground: 225 30% 20%; /* Deep cool navy */
 
     --popover: 0 0% 100%; /* White */
-    --popover-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
+    --popover-foreground: 225 30% 20%; /* Deep cool navy */
 
-    --primary: 168 76% 42%; /* Teal #1ABC9C */
-    --primary-foreground: 0 0% 100%; /* White for contrast on Teal */
+    --primary: 210 100% 56%; /* Bright professional blue */
+    --primary-foreground: 0 0% 100%; /* White for contrast */
 
-    --secondary: 0 0% 90%; /* Slightly darker gray than background */
-    --secondary-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
+    --secondary: 220 30% 94%; /* Light cool gray */
+    --secondary-foreground: 225 30% 25%; /* Slightly darker Deep cool navy */
 
-    --muted: 0 0% 85%; /* Medium gray for muted elements */
-    --muted-foreground: 210 29% 30%; /* Darker Dark Blue for muted text for better contrast */
+    --muted: 220 20% 88%; /* Medium cool gray for muted elements */
+    --muted-foreground: 220 15% 45%; /* Darker cool gray for muted text */
 
-    --accent: 168 76% 85%; /* Lighter Teal for hover/secondary highlights */
-    --accent-foreground: 210 29% 24%; /* Dark Blue #2C3E50 */
+    --accent: 200 100% 50%; /* Cyan for accents */
+    --accent-foreground: 225 30% 15%; /* Very dark navy for text on accent */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* Light gray/white for text on destructive */
 
-    --border: 0 0% 88%; /* Border color */
-    --input: 0 0% 90%; /* Input background */
-    --ring: 168 76% 42%; /* Teal #1ABC9C for focus rings */
+    --border: 220 25% 90%; /* Border color - light cool gray */
+    --input: 220 30% 96%; /* Input background - very light cool gray */
+    --ring: 210 100% 56%; /* Bright professional blue for focus rings */
 
     --radius: 0.5rem;
 
-    --chart-1: 168 76% 42%; /* Teal */
-    --chart-2: 210 29% 30%; /* Darker Blue */
-    --chart-3: 168 50% 60%; /* Lighter Teal */
-    --chart-4: 210 40% 50%; /* Medium Blue */
-    --chart-5: 180 50% 50%; /* Cyanish */
+    --chart-1: 210 100% 56%; /* Bright professional blue */
+    --chart-2: 200 100% 50%; /* Cyan */
+    --chart-3: 210 80% 70%; /* Lighter professional blue */
+    --chart-4: 200 80% 65%; /* Lighter cyan */
+    --chart-5: 225 30% 50%; /* Mid cool navy */
     
-    --sidebar-background: 210 29% 18%; /* Darker blue for sidebar if used */
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 168 76% 42%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 168 76% 35%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 210 29% 25%;
-    --sidebar-ring: 168 76% 50%;
+    --sidebar-background: 225 25% 15%; /* Darker cool navy for sidebar */
+    --sidebar-foreground: 220 30% 90%; /* Light gray for sidebar text */
+    --sidebar-primary: 210 100% 60%; /* Bright blue for sidebar primary elements */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on sidebar primary */
+    --sidebar-accent: 210 100% 50%; /* Slightly darker bright blue for sidebar accent */
+    --sidebar-accent-foreground: 0 0% 100%; /* White text on sidebar accent */
+    --sidebar-border: 225 20% 25%; /* Border for sidebar elements */
+    --sidebar-ring: 210 100% 60%; /* Ring for sidebar focus */
   }
 
   .dark {
-    --background: 210 29% 12%; /* Very Dark Blue */
-    --foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
+    --background: 225 20% 12%; /* Very dark cool navy */
+    --foreground: 220 30% 95%; /* Very light cool gray */
 
-    --card: 210 29% 18%; /* Dark Blue for cards */
-    --card-foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
+    --card: 225 20% 18%; /* Darker cool navy for cards */
+    --card-foreground: 220 30% 95%; /* Very light cool gray */
 
-    --popover: 210 29% 18%; /* Dark Blue */
-    --popover-foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
+    --popover: 225 20% 18%; /* Darker cool navy */
+    --popover-foreground: 220 30% 95%; /* Very light cool gray */
 
-    --primary: 168 76% 50%; /* Brighter Teal for dark mode */
-    --primary-foreground: 0 0% 100%; /* White text on bright Teal for dark mode */
+    --primary: 210 100% 60%; /* Slightly brighter blue for dark mode */
+    --primary-foreground: 225 20% 15%; /* Very dark navy for text on primary */
 
-    --secondary: 210 29% 22%; /* Darker blue for secondary elements */
-    --secondary-foreground: 0 0% 94.1%; /* Light Gray #F0F0F0 */
+    --secondary: 225 20% 22%; /* Darker cool navy for secondary elements */
+    --secondary-foreground: 220 30% 90%; /* Lighter cool gray */
 
-    --muted: 210 29% 25%; /* Muted dark blue */
-    --muted-foreground: 0 0% 75%; /* Adjusted for better visibility in dark mode */
+    --muted: 225 15% 30%; /* Muted dark cool navy */
+    --muted-foreground: 220 20% 65%; /* Medium-light cool gray for muted text */
 
-    --accent: 168 76% 35%; /* Darker Teal for accent */
-    --accent-foreground: 0 0% 98%; /* Very light gray/white */
+    --accent: 200 100% 55%; /* Brighter cyan for accent */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 70% 50%; /* Darker, less saturated red */
+    --destructive-foreground: 0 0% 98%; /* Light gray/white */
 
-    --border: 210 29% 25%; /* Border color for dark mode */
-    --input: 210 29% 22%; /* Input background for dark mode */
-    --ring: 168 76% 55%; /* Brighter Teal for focus rings */
+    --border: 225 15% 25%; /* Border color for dark mode */
+    --input: 225 15% 20%; /* Input background for dark mode */
+    --ring: 210 100% 60%; /* Brighter blue for focus rings */
     
-    --chart-1: 168 76% 50%;
-    --chart-2: 210 29% 70%;
-    --chart-3: 168 50% 30%;
-    --chart-4: 210 40% 20%;
-    --chart-5: 180 50% 30%;
+    --chart-1: 210 100% 60%;
+    --chart-2: 200 100% 55%;
+    --chart-3: 210 80% 40%;
+    --chart-4: 200 80% 35%;
+    --chart-5: 225 30% 70%;
 
-    --sidebar-background: 210 29% 10%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 168 76% 50%;
+    --sidebar-background: 225 20% 10%; /* Even darker navy for sidebar */
+    --sidebar-foreground: 220 30% 90%;
+    --sidebar-primary: 210 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 168 76% 40%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 210 29% 15%;
-    --sidebar-ring: 168 76% 55%;
+    --sidebar-accent: 210 100% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 225 15% 20%;
+    --sidebar-ring: 210 100% 65%;
   }
 }
 
