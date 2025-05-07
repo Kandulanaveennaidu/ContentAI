@@ -15,24 +15,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { useTour } from '@/components/tour/TourProvider';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 interface AnalysisResultCardProps {
   title: string;
   icon: React.ElementType;
   children: React.ReactNode;
   isLoading?: boolean;
+  loadingSkeleton: React.ReactNode; // Add prop for skeleton structure
 }
 
-const AnalysisResultCard: React.FC<AnalysisResultCardProps> = ({ title, icon: Icon, children, isLoading }) => (
-  <Card className="shadow-lg transition-all duration-300 hover:shadow-xl h-full">
+const AnalysisResultCard: React.FC<AnalysisResultCardProps> = ({ title, icon: Icon, children, isLoading, loadingSkeleton }) => (
+  <Card className="shadow-lg transition-all duration-300 hover:shadow-xl h-full min-h-[250px]"> {/* Ensure min height */}
     <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
       <Icon className="h-6 w-6 text-primary" />
       <CardTitle className="text-lg font-semibold">{title}</CardTitle>
     </CardHeader>
     <CardContent>
       {isLoading ? (
-        <div className="flex items-center justify-center h-24">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-4 py-2">
+          {loadingSkeleton} {/* Render the skeleton structure */}
         </div>
       ) : (
         children
@@ -40,6 +42,46 @@ const AnalysisResultCard: React.FC<AnalysisResultCardProps> = ({ title, icon: Ic
     </CardContent>
   </Card>
 );
+
+// Skeleton structure for Readability Card
+const ReadabilitySkeleton = () => (
+  <>
+    <div>
+      <Skeleton className="h-5 w-32 mb-2" /> {/* Title skeleton */}
+      <Skeleton className="h-10 w-24 mb-1" /> {/* Score skeleton */}
+      <Skeleton className="h-4 w-40" /> {/* Level skeleton */}
+    </div>
+    <div>
+      <Skeleton className="h-5 w-48 mb-3" /> {/* Suggestions Title skeleton */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-[90%]" />
+        <Skeleton className="h-4 w-[95%]" />
+        <Skeleton className="h-4 w-[85%]" />
+      </div>
+    </div>
+  </>
+);
+
+// Skeleton structure for Engagement Card
+const EngagementSkeleton = () => (
+  <>
+    <div>
+      <Skeleton className="h-5 w-40 mb-2" /> {/* Title skeleton */}
+      <Skeleton className="h-10 w-28 mb-1" /> {/* Score skeleton */}
+    </div>
+    <div>
+      <Skeleton className="h-5 w-32 mb-3" /> {/* Tips Title skeleton */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-[95%]" />
+        <Skeleton className="h-4 w-[90%]" />
+        <Skeleton className="h-4 w-[88%]" />
+      </div>
+    </div>
+  </>
+);
+
 
 type StoredAnalysis = {
   id: string;
@@ -367,7 +409,12 @@ export default function AnalyzePage() {
           </TabsList>
 
           <TabsContent value="readability">
-            <AnalysisResultCard title="Readability Analysis" icon={BookOpen} isLoading={isLoading && !readabilityResult}>
+            <AnalysisResultCard 
+              title="Readability Analysis" 
+              icon={BookOpen} 
+              isLoading={isLoading}
+              loadingSkeleton={<ReadabilitySkeleton />} // Pass skeleton here
+            >
               {readabilityResult ? (
                 <div className="space-y-4">
                   <div>
@@ -396,7 +443,12 @@ export default function AnalyzePage() {
           </TabsContent>
 
           <TabsContent value="engagement">
-            <AnalysisResultCard title="Engagement Prediction" icon={BarChart3} isLoading={isLoading && !engagementResult}>
+            <AnalysisResultCard 
+              title="Engagement Prediction" 
+              icon={BarChart3} 
+              isLoading={isLoading}
+              loadingSkeleton={<EngagementSkeleton />} // Pass skeleton here
+            >
               {engagementResult ? (
                 <div className="space-y-4">
                   <div>
@@ -498,7 +550,15 @@ export default function AnalyzePage() {
                 </ul>
               </ScrollArea>
             ) : (
-              <p className="text-muted-foreground text-center py-8">No analysis history yet. Your analyses will appear here.</p>
+               isLoading ? ( // Show skeleton for history while analyzing initial content
+                 <div className="space-y-4 py-4">
+                   <Skeleton className="h-20 w-full rounded-md" />
+                   <Skeleton className="h-20 w-full rounded-md" />
+                   <Skeleton className="h-20 w-full rounded-md" />
+                 </div>
+               ) : (
+                 <p className="text-muted-foreground text-center py-8">No analysis history yet. Your analyses will appear here.</p>
+               )
             )}
           </CardContent>
         </Card>
