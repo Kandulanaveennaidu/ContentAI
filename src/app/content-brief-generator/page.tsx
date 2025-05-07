@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { FileText, Lightbulb, CheckSquare, Target, Users, RefreshCw, Copy } from 'lucide-react';
+import { FileText, Lightbulb, CheckSquare, Target, Users, RefreshCw, Copy, ArrowRight } from 'lucide-react'; // Added ArrowRight
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -256,3 +256,4 @@ export default function ContentBriefGeneratorPage() {
     </div>
   );
 }
+
