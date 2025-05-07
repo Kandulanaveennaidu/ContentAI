@@ -1,4 +1,3 @@
-// src/app/book-a-demo/page.tsx
 "use client";
 
 import { Header } from '@/components/layout/Header';
@@ -13,7 +12,7 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { CalendarCheck, Users, BarChart2, CheckCircle } from 'lucide-react';
+import { CalendarCheck, Users, BarChart2, CheckCircle, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const demoFormSchema = z.object({
@@ -126,7 +125,12 @@ export default function BookADemoPage() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full py-3 text-base" disabled={form.formState.isSubmitting}>
+                      <Button 
+                        type="submit" 
+                        className="w-full py-3 text-base bg-accent text-accent-foreground hover:bg-accent/90" // Use accent color
+                        disabled={form.formState.isSubmitting}
+                      >
+                        <Send className="mr-2 h-5 w-5"/> 
                         {form.formState.isSubmitting ? "Submitting Request..." : "Schedule My Demo"}
                       </Button>
                     </form>
