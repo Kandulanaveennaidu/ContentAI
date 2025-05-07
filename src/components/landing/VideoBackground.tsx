@@ -29,10 +29,8 @@ export function VideoBackground({ src }: VideoBackgroundProps) {
         poster="https://picsum.photos/1920/1080?blur=2" // Placeholder poster
         data-ai-hint="abstract technology"
       />
-      {/* Changed gradient to ensure darker background for better text visibility */}
-      <div className="absolute inset-0 bg-black/75"></div>
+      {/* Dark overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black/75"></div> 
     </div>
   );
 }
-
-

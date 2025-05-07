@@ -55,10 +55,11 @@ const cardVariants = {
       ease: "easeOut"
     }
   }),
+  // Refined hover effect: slight scale up and subtle shadow increase
   hover: { 
-    y: -5, // Changed from scale to y-translate for smoother feel
-    boxShadow: "0px 10px 20px rgba(var(--foreground), 0.1)", // Adjusted shadow color source
-    transition: { type: "spring", stiffness: 300, damping: 20 } // Adjusted damping
+    scale: 1.03, // Subtle scale effect
+    boxShadow: "0px 12px 25px rgba(var(--foreground), 0.12)", // Slightly more pronounced shadow
+    transition: { type: "spring", stiffness: 280, damping: 18 } // Adjusted spring physics
   } 
 };
 
@@ -167,7 +168,7 @@ export function PricingSection() {
               className="h-full"
             >
               <Card 
-                className={`flex flex-col h-full transition-shadow duration-300 ${plan.popular ? 'border-primary border-2 relative shadow-primary/20' : 'shadow-lg'} `}
+                className={`flex flex-col h-full transition-all duration-300 ${plan.popular ? 'border-primary border-2 relative shadow-primary/20' : 'shadow-lg'} `} // Added transition-all
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-md">
