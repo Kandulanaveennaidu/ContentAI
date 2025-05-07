@@ -258,16 +258,29 @@ export default function AnalyzePage() {
     }
   }, [isLoading]);
 
-  // Tour Logic
+  // Tour Logic - Updated to prevent multiple starts
    useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tourCompleted = localStorage.getItem('appTourCompleted_AnalyzePage_v1') === 'true'; // Versioned key
-      if (!tourCompleted && !isTourActive && !isLoading) { // Don't start tour if already analyzing
-        setTimeout(() => startTour(analyzePageTourSteps), 700); // Delay slightly more
+      const tourCompleted = localStorage.getItem('appTourCompleted_AnalyzePage_v1') === 'true';
+      // Only attempt to start if not completed and not currently active
+      if (!tourCompleted && !isTourActive) {
+        // Optional: add a small delay to ensure the page is settled.
+        // We remove the isLoading check here because the tour should ideally
+        // only trigger once on mount if not completed. Subsequent loading states
+        // shouldn't restart the tour.
+        const timer = setTimeout(() => {
+          // Double-check completion status inside timeout in case it changed
+          if (localStorage.getItem('appTourCompleted_AnalyzePage_v1') !== 'true' && !isTourActive) {
+             startTour(analyzePageTourSteps);
+          }
+        }, 700); // Delay slightly
+        return () => clearTimeout(timer); // Cleanup timer
       }
     }
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startTour, isTourActive, isLoading]); // Re-check if loading state changes
+    // Depend only on startTour and isTourActive. startTour reference usually doesn't change.
+    // isTourActive changing might re-trigger the check, but the !tourCompleted condition prevents restart.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTour, isTourActive]);
 
 
   // --- Handlers & Helpers ---
