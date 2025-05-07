@@ -75,7 +75,8 @@ export default function CompanyPage() {
             className="mb-16 md:mb-24 grid md:grid-cols-2 gap-10 lg:gap-16 items-center"
             variants={fadeIn(0.2)}
             initial="hidden"
-            animate="visible"
+            whileInView="visible" // Changed to whileInView for the section
+            viewport={{ once: true, amount: 0.3 }} // Added viewport for the section
           >
             <div className="space-y-6">
               <h2 className="text-3xl font-semibold tracking-tight text-foreground">Our Mission</h2>
@@ -86,14 +87,19 @@ export default function CompanyPage() {
                 We believe that powerful AI shouldn't be confined to large enterprises. ContentAI is built on the principle of making sophisticated technology intuitive, accessible, and affordable for everyone who strives to communicate more effectively.
               </p>
             </div>
-             <motion.div variants={fadeIn(0.3)} initial="hidden" animate="visible">
+             <motion.div 
+                variants={fadeIn(0.3)} 
+                initial="hidden" 
+                whileInView="visible" // Changed from animate="visible"
+                viewport={{ once: true, amount: 0.3 }} // Added viewport
+             >
               <Image 
                 src="https://picsum.photos/seed/missionvision/600/450" 
-                alt="Team collaborating on a shared vision" 
+                alt="ContentAI Inc. team collaborating on a shared vision" // Enhanced alt text
                 width={600} 
                 height={450}
                 className="rounded-xl shadow-2xl object-cover"
-                data-ai-hint="team vision board"
+                data-ai-hint="team vision" // Kept hint concise and relevant
               />
             </motion.div>
           </motion.section>
@@ -103,12 +109,15 @@ export default function CompanyPage() {
             className="mb-16 md:mb-24"
             variants={fadeIn(0.4)}
             initial="hidden"
-            animate="visible"
+            whileInView="visible" // Changed to whileInView
+            viewport={{ once: true, amount: 0.2 }} // Added viewport
           >
             <h2 className="text-3xl font-semibold tracking-tight text-foreground mb-10 text-center">Our Core Values</h2>
             <motion.div 
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-              variants={containerVariants}
+              variants={containerVariants} // This handles stagger for children
+              // initial="hidden" // Handled by parent section
+              // animate="visible" // Handled by parent section
             >
               {coreValues.map((value, index) => (
                 <motion.div key={value.title} variants={fadeIn(0, 25)}>
@@ -133,12 +142,13 @@ export default function CompanyPage() {
             className="mb-16 md:mb-24"
             variants={fadeIn(0.6)}
             initial="hidden"
-            animate="visible"
+            whileInView="visible" // Changed to whileInView
+            viewport={{ once: true, amount: 0.2 }} // Added viewport
           >
             <h2 className="text-3xl font-semibold tracking-tight text-foreground mb-10 text-center">Meet Our Leadership</h2>
             <motion.div 
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-                variants={containerVariants}
+                variants={containerVariants} // This handles stagger for children
             >
               {teamMembers.map((member, index) => (
                 <motion.div key={member.name} variants={fadeIn(0, 25)}>
@@ -162,7 +172,8 @@ export default function CompanyPage() {
             className="mb-12 md:mb-20 py-12 md:py-16 bg-secondary rounded-lg text-center"
             variants={fadeIn(0.8)}
             initial="hidden"
-            animate="visible"
+            whileInView="visible" // Changed to whileInView
+            viewport={{ once: true, amount: 0.3 }} // Added viewport
           >
             <Briefcase className="mx-auto h-12 w-12 text-primary mb-4"/>
             <h2 className="text-3xl font-semibold tracking-tight text-secondary-foreground mb-4">Join Our Team</h2>
@@ -179,7 +190,8 @@ export default function CompanyPage() {
             className="py-12"
             variants={fadeIn(0.9)}
             initial="hidden"
-            animate="visible"
+            whileInView="visible" // Changed to whileInView
+            viewport={{ once: true, amount: 0.2 }} // Added viewport
           >
             <h2 className="text-3xl font-semibold tracking-tight text-foreground mb-10 text-center">Our Headquarters</h2>
             <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -219,3 +231,4 @@ export default function CompanyPage() {
     </div>
   );
 }
+
