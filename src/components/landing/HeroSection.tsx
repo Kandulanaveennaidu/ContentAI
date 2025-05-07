@@ -18,7 +18,7 @@ export function HeroSection() {
       {/* Container needs higher z-index than video background */}
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.h1
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black" // Changed base text to black
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-foreground" // Changed base text to foreground
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -26,7 +26,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p
-          className="mx-auto mt-6 max-w-[700px] text-lg text-black md:text-xl" // Changed text to black
+          className="mx-auto mt-6 max-w-[700px] text-lg text-foreground md:text-xl" // Changed text to foreground
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
@@ -50,11 +50,11 @@ export function HeroSection() {
           </Link>
           <Link href="#features" passHref>
              <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-               {/* Button retains its styling for visibility */}
+               {/* Adjusted button styling for better contrast in both modes */}
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-white border-white/70 hover:bg-white hover:text-primary transition-colors backdrop-blur-sm bg-black/30 hover:bg-white/90" 
+                className="w-full sm:w-auto text-foreground border-foreground/70 hover:bg-foreground hover:text-background transition-colors backdrop-blur-sm bg-black/30 dark:bg-white/30 hover:bg-white/90 dark:hover:bg-black/90" 
               >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Learn More
