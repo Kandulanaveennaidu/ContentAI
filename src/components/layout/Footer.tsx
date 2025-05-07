@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-               <Image src="/logo.svg" alt="ContentAI Logo" width={28} height={28} />
+               <Image src="/logo.svg" alt="ContentAI Logo" width={32} height={32} /> {/* Updated size */}
                <span className="text-xl font-bold tracking-tight">
                  Content<span className="text-primary">AI</span>
                </span>
@@ -57,7 +57,7 @@ export function Footer() {
         
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-muted-foreground mb-4 md:mb-0 space-x-3">
-             <span>&copy; {currentYear} ContentAI. All rights reserved.</span>
+             <span>&copy; {currentYear} ContentAI Inc. All rights reserved.</span> {/* Added Inc. */}
              <Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link>
              <Link href="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</Link>
           </div>
@@ -73,4 +73,3 @@ export function Footer() {
     </footer>
   );
 }
-

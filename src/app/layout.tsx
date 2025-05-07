@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'ContentAI - Amplify Your Content',
   description: 'AI-powered content analysis for readability and engagement.',
   icons: {
-    icon: '/logo.svg', 
+    icon: '/logo.svg', // Use the new SVG logo
   }
 };
 
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="system" // Changed from light to system default
           enableSystem
           disableTransitionOnChange
         >
@@ -33,4 +33,3 @@ export default function RootLayout({
     </html>
   );
 }
-
