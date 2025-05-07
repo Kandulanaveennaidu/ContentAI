@@ -24,7 +24,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-gray-200 md:text-xl drop-shadow-sm"
+          className="mx-auto mt-6 max-w-[700px] text-lg text-primary-foreground md:text-xl drop-shadow-sm" // Changed from text-gray-200
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
@@ -58,5 +58,6 @@ export function HeroSection() {
     </section>
   );
 }
+
 
 

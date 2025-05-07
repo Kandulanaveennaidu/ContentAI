@@ -5,35 +5,45 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle } from 'lucide-react';
+import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle, BookOpen, ChevronDown, CalendarCheck, FileText, Users, Target, Award, FlaskConical, MessageSquareQuote, FileJson, Edit3 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 
 
-const mainNavLinks = [
+const mainNavLinksBase = [
   { href: '/#features', label: 'Features' },
   { href: '/#pricing', label: 'Pricing' },
-  { href: '/about', label: 'About Us' },
-  { href: '/contact', label: 'Contact Us'},
+  { href: '/blog', label: 'Blog'},
+  { href: '/book-a-demo', label: 'Book a Demo'},
+];
+
+const resourcesDropdownLinks = [
+  { href: '/why-contentai', label: 'Why ContentAI?', icon: Target },
+  { href: '/case-studies', label: 'Case Studies', icon: FileText },
+  { href: '/testimonials', label: 'Testimonials', icon: MessageSquareQuote },
+  { href: '/ai-studies', label: 'AI Studies', icon: FlaskConical },
+  { href: '/documentation', label: 'Documentation', icon: BookOpen },
+  { href: '/content-planning', label: 'Content Planning', icon: CalendarCheck },
+  { href: '/optimize', label: 'Optimize Content', icon: Edit3 },
+  { href: '/content-brief-generator', label: 'Brief Generator', icon: FileJson },
+  
 ];
 
 const appNavLink = { href: '/analyze', label: 'Analyze Content', icon: Sparkles };
 const dashboardLink = { href: '/dashboard', label: 'Dashboard', icon: BarChartHorizontalBig };
 
-
-const authLinks = (isLoggedIn: boolean) => isLoggedIn ? [
+const authLinks = (isLoggedIn: boolean, handleLogout: () => void) => isLoggedIn ? [
   { href: '/profile', label: 'Profile', icon: UserCircle },
   { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '#', label: 'Logout', primary: false, action: () => console.log("Logout clicked") /* Placeholder */ }
+  { href: '#', label: 'Logout', primary: false, action: handleLogout }
 ] : [
   { href: '/login', label: 'Login' },
   { href: '/signup', label: 'Sign Up', primary: true },
 ];
-
 
 export function Header() {
   const pathname = usePathname();
@@ -41,15 +51,22 @@ export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
-  // Placeholder for login state - replace with actual auth context
   const [isLoggedIn, setIsLoggedIn] = React.useState(false); 
   React.useEffect(() => {
-    // Simulate checking login state on mount
     if (typeof window !== "undefined") {
       setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
     }
-  }, []);
+  }, [pathname]); // Re-check on pathname change for SPA behavior after login/logout
 
+
+  const handleLogout = () => {
+    console.log("Logout action"); 
+    setIsLoggedIn(false); 
+    if(typeof window !== "undefined") localStorage.removeItem('isLoggedIn');
+    // Potentially redirect to home or login page
+    // router.push('/'); // if using useRouter
+    if (mobileMenuOpen) setMobileMenuOpen(false);
+  };
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -61,10 +78,15 @@ export function Header() {
 
   const isAppRelatedPage = pathname.startsWith('/analyze') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/settings');
   
-  const navLinksToDisplay = isAppRelatedPage ? [] : mainNavLinks;
+  const navLinksToDisplay = isAppRelatedPage ? [] : mainNavLinksBase;
+  
   const mobileNavLinks = isAppRelatedPage 
-    ? [dashboardLink, appNavLink] 
-    : [...mainNavLinks, appNavLink, dashboardLink];
+    ? [dashboardLink, appNavLink, ...authLinks(isLoggedIn, handleLogout)] 
+    : [...mainNavLinksBase, 
+        {label: "Resources", isDropdown: true, items: resourcesDropdownLinks},
+        appNavLink, 
+        ...authLinks(isLoggedIn, handleLogout)
+      ];
 
 
   return (
@@ -87,21 +109,51 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-1 md:flex"> {/* Reduced gap for more items */}
           {navLinksToDisplay.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium text-muted-foreground transition-colors hover:text-primary",
-                pathname === link.href && "text-primary"
+                "text-sm font-medium text-muted-foreground transition-colors hover:text-primary px-3 py-2 rounded-md", // Added padding & rounded
+                pathname === link.href && "text-primary bg-accent"
               )}
             >
               {link.label}
             </Link>
           ))}
 
-          {!isAppRelatedPage && (
+          {/* Resources Dropdown */}
+           {!isAppRelatedPage && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent px-3 py-2">
+                  Resources <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {resourcesDropdownLinks.map(link => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link href={link.href} className={cn("flex items-center gap-2 w-full", pathname === link.href && "bg-accent")}>
+                      {link.icon && React.createElement(link.icon, {className: "h-4 w-4 text-muted-foreground"})}
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+
+          {!isAppRelatedPage && isLoggedIn && (
+            <Link href={dashboardLink.href} passHref>
+              <Button variant="default" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
+                {React.createElement(dashboardLink.icon, { className: "mr-2 h-4 w-4"})}
+                Go to Dashboard
+              </Button>
+            </Link>
+          )}
+           {!isAppRelatedPage && !isLoggedIn && (
             <Link href={appNavLink.href} passHref>
               <Button variant="default" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
                 {React.createElement(appNavLink.icon, { className: "mr-2 h-4 w-4"})}
@@ -128,26 +180,19 @@ export function Header() {
           )}
 
 
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-border mx-2" />
           
-          {authLinks(isLoggedIn).map((link) => (
-            link.href === '#' && link.action ? ( // Logout button
-              <Button key={link.label} variant={'outline'} size="sm" onClick={() => {
-                link.action && link.action();
-                setIsLoggedIn(false); // Simulate logout
-                if(typeof window !== "undefined") localStorage.removeItem('isLoggedIn');
-              }}>
-                {link.label}
-              </Button>
-            ) : link.icon ? ( // Profile/Settings (dropdown for logged in)
-              <DropdownMenu key={link.label}>
+          {isLoggedIn ? (
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <UserCircle className="h-6 w-6" />
-                    <span className="sr-only">{link.label}</span>
+                    <span className="sr-only">User Menu</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <UserCircle className="mr-2 h-4 w-4" /> Profile
@@ -159,24 +204,20 @@ export function Header() {
                      </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {
-                     console.log("Logout action"); // Placeholder
-                     setIsLoggedIn(false); 
-                     if(typeof window !== "undefined") localStorage.removeItem('isLoggedIn');
-                     // Potentially redirect to home or login page
-                  }}>
+                  <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : ( // Standard auth links (Login/Signup)
+          ) : (
+            authLinks(isLoggedIn, handleLogout).map((link) => (
               <Link key={link.href} href={link.href!} passHref>
                 <Button variant={link.primary ? 'default' : 'outline'} size="sm" className={cn(link.primary && "shadow-md hover:shadow-lg transition-shadow")}>
                   {link.label}
                 </Button>
               </Link>
-            )
-          )).filter((_, index) => isLoggedIn ? index === 0 : true) /* Show only one icon/button for logged in state */ }
+            ))
+          )}
 
 
           <Button
@@ -215,42 +256,51 @@ export function Header() {
                     Content<span className="text-primary">AI</span>
                  </span>
               </div>
-              <nav className="flex flex-col gap-4">
-                {mobileNavLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "text-base font-medium transition-colors hover:text-primary py-2 flex items-center",
-                      (link as any).cta ? "text-primary font-semibold" : "text-muted-foreground",
-                       pathname === link.href && ((link as any).cta ? "text-primary brightness-110" : "text-primary")
-                    )}
-                  >
-                    {link.icon && React.createElement(link.icon, { className: "mr-2 h-5 w-5"})}
-                    {link.label}
-                  </Link>
-                ))}
-                <hr className="my-2 border-border" />
-                {authLinks(isLoggedIn).map((link) => (
-                  link.href === '#' && link.action ? (
-                     <Button key={link.label} variant={'outline'} className="w-full" onClick={() => {
-                       link.action && link.action();
-                       setIsLoggedIn(false);
-                       if(typeof window !== "undefined") localStorage.removeItem('isLoggedIn');
-                       setMobileMenuOpen(false);
-                     }}>
+              <nav className="flex flex-col gap-1"> {/* Reduced gap for more items */}
+                {mobileNavLinks.map((link) => {
+                  if ((link as any).isDropdown) {
+                    return (
+                      <DropdownMenu key={link.label}>
+                        <DropdownMenuTrigger asChild>
+                           <Button variant="ghost" className="w-full justify-start text-base font-medium text-muted-foreground hover:text-primary py-2 flex items-center">
+                            {link.icon && React.createElement(link.icon, { className: "mr-2 h-5 w-5"})}
+                            {link.label} <ChevronDown className="ml-auto h-4 w-4"/>
+                           </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="bottom" align="start" className="w-[250px]">
+                           {(link as any).items.map((subLink: any) => (
+                            <DropdownMenuItem key={subLink.href} asChild>
+                                <Link href={subLink.href} onClick={() => setMobileMenuOpen(false)} className={cn("flex items-center gap-2 w-full", pathname === subLink.href && "bg-accent")}>
+                                {subLink.icon && React.createElement(subLink.icon, {className: "h-4 w-4 text-muted-foreground"})}
+                                {subLink.label}
+                                </Link>
+                            </DropdownMenuItem>
+                           ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    );
+                  }
+                  return (link.href === '#' && link.action) ? ( // Logout
+                     <Button key={link.label} variant={'outline'} className="w-full justify-start text-base font-medium py-2" onClick={() => {link.action && link.action()}}>
+                      {link.icon && React.createElement(link.icon, { className: "mr-2 h-5 w-5"})}
                       {link.label}
                     </Button>
                   ) : (
-                    <Link key={link.href} href={link.href!} passHref>
-                      <Button variant={link.primary ? 'default' : 'outline'} className="w-full" onClick={() => setMobileMenuOpen(false)}>
-                        {link.icon && React.createElement(link.icon, { className: "mr-2 h-4 w-4"})}
-                        {link.label}
-                      </Button>
+                    <Link
+                      key={link.href}
+                      href={link.href!}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "text-base font-medium transition-colors hover:text-primary py-2 flex items-center rounded-md px-3",
+                        link.primary ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground hover:bg-accent",
+                        pathname === link.href && (link.primary ? "brightness-110" : "text-primary bg-accent")
+                      )}
+                    >
+                      {link.icon && React.createElement(link.icon, { className: "mr-2 h-5 w-5"})}
+                      {link.label}
                     </Link>
                   )
-                ))}
+                })}
               </nav>
             </SheetContent>
           </Sheet>
@@ -259,3 +309,4 @@ export function Header() {
     </motion.header>
   );
 }
+
