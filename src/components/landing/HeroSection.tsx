@@ -16,7 +16,7 @@ export function HeroSection() {
       <VideoBackground src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-vr-glasses-42930-large.mp4" />
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black dark:text-gray-50" // Changed text color
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black dark:text-gray-50"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -24,7 +24,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-black dark:text-gray-200 md:text-xl" // Changed text color
+          className="mx-auto mt-6 max-w-[700px] text-lg text-black dark:text-gray-200 md:text-xl"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
@@ -47,7 +47,11 @@ export function HeroSection() {
           </Link>
           <Link href="#features" passHref>
              <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white transition-colors backdrop-blur-sm">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto text-primary border-primary hover:bg-primary hover:text-primary-foreground transition-colors backdrop-blur-sm"
+              >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Learn More
               </Button>
@@ -58,3 +62,4 @@ export function HeroSection() {
     </section>
   );
 }
+
