@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const MotionButton = motion(Button); // Create a motion component from Button
+
 export function CallToActionSection() {
   const buttonVariants = {
     hover: { scale: 1.05, boxShadow: "0px 8px 25px rgba(0,0,0,0.2)" , transition: { type: "spring", stiffness: 300 } },
@@ -51,18 +53,24 @@ export function CallToActionSection() {
           Join thousands of creators optimizing their content with ContentAI. Sign up for free and experience the difference.
         </motion.p>
         <motion.div 
-          className="mt-8"
+          className="mt-8 inline-block" // Changed to inline-block to prevent full width
           initial={{ opacity: 0, scale: 0.8 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           viewport={{ once: true }}
         >
           <Link href="/signup" passHref>
-            <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
-              <Button size="lg" variant="secondary" className="text-primary bg-primary-foreground hover:bg-primary-foreground/90">
-                Sign Up for Free
-              </Button>
-            </motion.div>
+             {/* Apply motion directly to the Button */}
+            <MotionButton 
+              size="lg" 
+              variant="secondary" 
+              className="text-primary bg-primary-foreground hover:bg-primary-foreground/90"
+              whileHover="hover" 
+              whileTap="tap" 
+              variants={buttonVariants}
+             >
+              Sign Up for Free
+            </MotionButton>
           </Link>
         </motion.div>
       </div>
