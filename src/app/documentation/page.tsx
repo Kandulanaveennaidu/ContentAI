@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Code, LifeBuoy, Search, Settings, Sparkles, BarChart3, Users } from 'lucide-react';
+import { BookOpen, Code, LifeBuoy, Search, Settings, Sparkles, BarChart3, Users, ArrowRight } from 'lucide-react'; // Added ArrowRight
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
