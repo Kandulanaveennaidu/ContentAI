@@ -4,8 +4,8 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import ReactMarkdown from 'react-markdown'; // Correct import
-import remarkGfm from 'remark-gfm'; // Correct import
+import ReactMarkdown from 'react-markdown'; // Import react-markdown
+import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown plugin
 import { generateBlogPost, type GenerateBlogPostInput, type GenerateBlogPostOutput } from '@/ai/flows/generate-blog-post-flow';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -260,10 +260,11 @@ export default function GenerateBlogPage() {
                 <Card className="shadow-xl">
                     <CardHeader>
                         <CardTitle className="text-2xl md:text-3xl">{generatedData.title}</CardTitle>
-                        <CardDescription className="flex flex-wrap gap-2 pt-2">
-                            <span className="font-semibold mr-2 flex items-center"><Tags className="h-4 w-4 mr-1"/> Tags:</span>
+                        {/* Wrap tags in a div instead of CardDescription */}
+                        <div className="flex flex-wrap items-center gap-2 pt-2 text-sm">
+                            <span className="font-semibold mr-2 flex items-center text-muted-foreground"><Tags className="h-4 w-4 mr-1"/> Tags:</span>
                             {generatedData.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
-                        </CardDescription>
+                        </div>
                          <CardDescription className="pt-1 italic"><span className="font-semibold not-italic mr-1 flex items-center"><FileText className="h-4 w-4 mr-1"/> Excerpt:</span> {generatedData.excerpt}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -308,7 +309,8 @@ export default function GenerateBlogPage() {
                         <div>
                             <Label className="text-lg font-semibold">Generated Content (Markdown)</Label>
                              {/* Apply prose styles for better Markdown rendering & ensure width fits */}
-                            <div className="mt-2 p-4 border rounded-md bg-muted/30 prose dark:prose-invert prose-sm sm:prose-base max-w-full break-words overflow-hidden">
+                             {/* Added prose-headings:text-foreground prose-p:text-muted-foreground etc. for better theme alignment */}
+                            <div className="mt-2 p-4 border rounded-md bg-muted/30 prose prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-blockquote:text-muted-foreground prose-li:text-muted-foreground dark:prose-invert prose-sm sm:prose-base max-w-full break-words overflow-hidden">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {generatedData.markdownContent}
                                 </ReactMarkdown>
