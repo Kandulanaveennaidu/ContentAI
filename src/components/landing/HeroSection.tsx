@@ -18,7 +18,7 @@ export function HeroSection() {
       {/* Container needs higher z-index than video background */}
       <div className="relative z-10 container mx-auto px-4 md:px-6"> 
         <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black" // Changed to text-black, removed shadow
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white" // Changed back to text-white
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -26,7 +26,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-black md:text-xl" // Changed to text-black, removed shadow
+          className="mx-auto mt-6 max-w-[700px] text-lg text-gray-100 md:text-xl" // Changed to light gray for visibility
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
