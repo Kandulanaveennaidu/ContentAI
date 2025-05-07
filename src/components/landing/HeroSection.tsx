@@ -16,7 +16,7 @@ export function HeroSection() {
       <VideoBackground src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-vr-glasses-42930-large.mp4" />
       <div className="relative z-10 container mx-auto px-4 md:px-6">
         <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-gray-50" // Changed from text-white, removed drop-shadow-lg
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black dark:text-gray-50" // Changed text color
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -24,7 +24,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-gray-200 md:text-xl" // Changed from text-gray-100, removed drop-shadow-sm
+          className="mx-auto mt-6 max-w-[700px] text-lg text-black dark:text-gray-200 md:text-xl" // Changed text color
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
@@ -58,4 +58,3 @@ export function HeroSection() {
     </section>
   );
 }
-
