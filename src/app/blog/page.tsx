@@ -11,7 +11,8 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { BlogPost } from '@/lib/blog-data'; // Import BlogPost type
-import { blogPosts as staticBlogPosts } from '@/lib/blog-data'; // Import static blogPosts data
+import { staticBlogPosts, loadUserBlogPosts } from '@/lib/blog-data'; // Import staticBlogPosts and loadUserBlogPosts function
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,29 +27,6 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-// Function to load user posts (client-side only) - Reuse from [slug]/page.tsx
-const loadUserBlogPosts = (): BlogPost[] => {
-  if (typeof window === 'undefined') return []; 
-
-  const stored = localStorage.getItem('userGeneratedBlogPosts');
-  if (!stored) return [];
-
-  try {
-    const parsed: BlogPost[] = JSON.parse(stored);
-    if (Array.isArray(parsed) && parsed.every(p => p.slug && p.title && p.markdownContent && p.featuredImage?.src)) {
-       return parsed.map(p => ({
-            ...p,
-            imageSrc: p.imageSrc || p.featuredImage.src, // Use featured image if card image missing
-            imageHint: p.imageHint || p.featuredImage.hint,
-        }));
-    }
-    return [];
-  } catch (e) {
-    console.error("Failed to parse user blog posts from localStorage", e);
-    return [];
-  }
-};
-
 
 export default function BlogPage() {
   const [allPosts, setAllPosts] = useState<BlogPost[]>([]);
@@ -56,13 +34,15 @@ export default function BlogPage() {
 
    // Load posts on client mount
   useEffect(() => {
+    // Load user posts from localStorage
     const userPosts = loadUserBlogPosts();
-    const combinedPosts = [...staticBlogPosts, ...userPosts];
+    // Combine static posts (imported) with user posts
+    const combinedPosts = [...staticBlogPosts, ...userPosts]; 
     // Optional: Sort posts by date if desired
     combinedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setAllPosts(combinedPosts);
     setIsLoading(false);
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
 
   return (

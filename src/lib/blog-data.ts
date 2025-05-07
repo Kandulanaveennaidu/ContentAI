@@ -1,35 +1,10 @@
 // src/lib/blog-data.ts
+import type { BlogPost as ImportedBlogPost, ContentBlock as ImportedContentBlock } from '@/lib/blog-data'; // Import existing types
 
-export interface ContentBlock {
-  type: 'heading' | 'paragraph' | 'image' | 'list' | 'quote' | 'code' | 'video' | 'icon-section'; // Added types from other data files
-  level?: 2 | 3 | 4; // For headings h2, h3, h4
-  text?: string; // For paragraph, heading, quote, iconText
-  src?: string; // For image or video
-  alt?: string; // For image
-  hint?: string; // For image AI hint / video poster hint
-  items?: string[]; // For list
-  language?: string; // For code block
-  code?: string; // For code block
-  icon?: keyof typeof import('lucide-react'); // Lucide icon name for icon-section
-  iconText?: string; // Title for icon-section
-  caption?: string; // For video or image
-  author?: string; // For quote
-}
+// Re-export types locally if needed, or ensure they are correctly imported where used.
+export type ContentBlock = ImportedContentBlock;
+export type BlogPost = ImportedBlogPost;
 
-export interface BlogPost {
-  slug: string;
-  title: string;
-  date: string;
-  author: string;
-  excerpt: string;
-  imageSrc?: string; // Made optional - will use featuredImage for card if needed
-  imageHint?: string; // Made optional
-  tags: string[];
-  featuredImage: { src: string; alt: string; hint: string }; // Keep this mandatory
-  contentBlocks?: ContentBlock[]; // Made optional
-  markdownContent?: string; // Added field for raw markdown
-  relatedReads?: string[]; // slugs of related posts
-}
 
 // Helper function to generate slugs (same as in ai-studies page)
 const generateSlug = (title: string) => {
@@ -39,8 +14,8 @@ const generateSlug = (title: string) => {
         .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
 };
 
-// Existing Blog Posts
-const existingBlogPosts: BlogPost[] = [
+// Define ONLY the static blog posts here
+const staticBlogPostsData: BlogPost[] = [
   {
     slug: "ai-in-content-creation-trends",
     title: "Top AI Trends Shaping Content Creation in 2024",
@@ -212,11 +187,8 @@ const existingBlogPosts: BlogPost[] = [
       { type: 'quote', text: "\"ContentAI gave us the insights we needed to transform our good content into high-converting content. The results speak for themselves.\" - CEO, Company X" },
     ],
   },
-];
-
-// Blog Posts Generated from AI Studies
-const aiStudiesBlogPosts: BlogPost[] = [
-  {
+  // Study-based blog posts
+   {
     slug: `ai-study-${generateSlug("The Impact of Flesch-Kincaid Score Optimization on User Engagement")}`,
     title: "Study Insights: Optimizing Flesch-Kincaid Scores Boosts User Engagement",
     date: "August 30, 2023", // Slightly after study date
@@ -306,12 +278,16 @@ const aiStudiesBlogPosts: BlogPost[] = [
       { type: 'quote', text: "Clearer, data-informed briefs lead directly to better content produced faster. AI is a powerful enabler for this." },
       { type: 'paragraph', text: "This study highlights the significant potential of AI tools like ContentAI's Brief Generator to streamline content workflows, improve collaboration between strategists and writers, and ultimately elevate the quality and efficiency of content production." }
     ],
-     relatedReads: ["ai-in-content-creation-trends", "content-brief-generator/page.tsx"] // Assuming a page for the tool itself
+     relatedReads: ["ai-in-content-creation-trends", "content-brief-generator"] // Link to the generator page if it exists
   }
 ];
 
-// Function to load user-generated posts from localStorage
-const loadUserBlogPosts = (): BlogPost[] => {
+// Export ONLY the static data
+export const staticBlogPosts: BlogPost[] = staticBlogPostsData;
+
+// Function to load user-generated posts from localStorage (Client-side only)
+// This function will be called by the page components, not directly in this file's module scope.
+export const loadUserBlogPosts = (): BlogPost[] => {
   if (typeof window === 'undefined') return []; // Guard against SSR/build time access
 
   const stored = localStorage.getItem('userGeneratedBlogPosts');
@@ -334,8 +310,3 @@ const loadUserBlogPosts = (): BlogPost[] => {
     return [];
   }
 };
-
-// Combine static and potentially dynamic user posts
-// Note: We call loadUserBlogPosts directly here. This works for client-side rendering.
-// For SSR/SSG, this data loading would need to happen differently (e.g., API route, getStaticProps).
-export const blogPosts: BlogPost[] = [...existingBlogPosts, ...loadUserBlogPosts()];

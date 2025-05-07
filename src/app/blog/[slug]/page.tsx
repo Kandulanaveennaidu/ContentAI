@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'; // Import hooks
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { blogPosts as staticBlogPosts, type BlogPost, type ContentBlock } from '@/lib/blog-data'; // Renamed static data
+import { staticBlogPosts, loadUserBlogPosts, type BlogPost, type ContentBlock } from '@/lib/blog-data'; // Import static posts and load function
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -118,29 +118,6 @@ const renderContentBlock = (block: ContentBlock, index: number): JSX.Element => 
   }
 };
 
-// Function to load user posts (client-side only)
-const loadUserBlogPosts = (): BlogPost[] => {
-  if (typeof window === 'undefined') return []; 
-
-  const stored = localStorage.getItem('userGeneratedBlogPosts');
-  if (!stored) return [];
-
-  try {
-    const parsed: BlogPost[] = JSON.parse(stored);
-    if (Array.isArray(parsed) && parsed.every(p => p.slug && p.title && p.markdownContent && p.featuredImage?.src)) {
-      return parsed.map(p => ({
-            ...p,
-            imageSrc: p.imageSrc || p.featuredImage.src,
-            imageHint: p.imageHint || p.featuredImage.hint,
-        }));
-    }
-    return [];
-  } catch (e) {
-    console.error("Failed to parse user blog posts from localStorage", e);
-    return [];
-  }
-};
-
 
 export default function BlogSlugPage({ params }: BlogSlugPageProps) {
   const { slug } = params;
@@ -151,7 +128,8 @@ export default function BlogSlugPage({ params }: BlogSlugPageProps) {
   // Load all posts (static + user-generated) on client mount
   useEffect(() => {
     const userPosts = loadUserBlogPosts();
-    setAllPosts([...staticBlogPosts, ...userPosts]);
+    const combined = [...staticBlogPosts, ...userPosts];
+    setAllPosts(combined);
   }, []);
 
 
@@ -160,6 +138,10 @@ export default function BlogSlugPage({ params }: BlogSlugPageProps) {
      if (allPosts.length > 0) {
        const foundPost = allPosts.find((p) => p.slug === slug);
        setPost(foundPost); // Set to foundPost or undefined if not found
+     } else {
+       // If allPosts is empty after loading, check if the slug matches a static post just in case
+       const staticMatch = staticBlogPosts.find(p => p.slug === slug);
+       setPost(staticMatch);
      }
   }, [allPosts, slug]);
 
