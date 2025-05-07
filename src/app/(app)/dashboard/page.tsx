@@ -1,7 +1,7 @@
 // src/app/(app)/dashboard/page.tsx
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, BookOpen, MessageSquare, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
