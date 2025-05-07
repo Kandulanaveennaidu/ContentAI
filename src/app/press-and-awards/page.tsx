@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Award, Newspaper, Download, BookOpen, MessageSquare } from 'lucide-react'; // Changed ExternalLink to BookOpen
+import { Award, Newspaper, Download, BookOpen, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ const pressMentions = [
     title: "ContentAI: Revolutionizing Content Strategy with AI",
     slug: "contentai-revolutionizing-content-strategy-with-ai",
     date: "September 15, 2023",
-    logoSrc: "https://picsum.photos/seed/techinnovate/150/50", // Removed grayscale
+    logoSrc: "https://picsum.photos/seed/techinnovate/150/50",
     logoHint: "magazine logo tech"
   },
   {
@@ -24,7 +24,7 @@ const pressMentions = [
     title: "The Future of Writing: How ContentAI is Leading the Charge",
     slug: "the-future-of-writing-how-contentai-is-leading-the-charge",
     date: "August 28, 2023",
-    logoSrc: "https://picsum.photos/seed/aiweekly/150/50", // Removed grayscale
+    logoSrc: "https://picsum.photos/seed/aiweekly/150/50",
     logoHint: "news logo AI"
   },
   {
@@ -32,7 +32,7 @@ const pressMentions = [
     title: "ContentAI's Engagement Prediction Tool: A Game Changer for Marketers",
     slug: "contentais-engagement-prediction-tool-a-game-changer-for-marketers",
     date: "July 05, 2023",
-    logoSrc: "https://picsum.photos/seed/marketingpro/150/50", // Removed grayscale
+    logoSrc: "https://picsum.photos/seed/marketingpro/150/50",
     logoHint: "marketing logo pro"
   },
 ];
@@ -50,7 +50,7 @@ const awards = [
     name: "Top Content Tech Solution 2023",
     awardedBy: "Content Marketing Institute",
     description: "Awarded for providing a leading technology solution that significantly improves content quality and effectiveness.",
-    icon: MessageSquare, // Changed from MessageSquareQuote to MessageSquare, or keep as is if preferred
+    icon: MessageSquare,
     imageSrc: "https://picsum.photos/seed/awardcontent/300/200",
     imageHint: "certificate award document"
   },
@@ -109,13 +109,13 @@ export default function PressAndAwardsPage() {
                 <motion.div key={index} variants={fadeIn(0, 20)}>
                   <Card className="h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                     <CardHeader>
-                      <div className="mb-3 h-12 flex items-center">
+                      <div className="mb-3 h-10"> {/* Fixed height for logo container (40px) */}
                         <Image 
-                          src={mention.logoSrc} 
+                          src={mention.logoSrc} // Source image is 150x50
                           alt={`${mention.publication} Logo`} 
-                          width={120} // Adjusted to match original values if they worked
-                          height={40}
-                          className="object-contain" 
+                          width={150} // Original width for aspect ratio
+                          height={50} // Original height for aspect ratio
+                          className="object-contain h-full w-auto" // Image fills container height, width auto
                           data-ai-hint={mention.logoHint} 
                         />
                       </div>
@@ -126,7 +126,7 @@ export default function PressAndAwardsPage() {
                     <div className="p-4 pt-0">
                       <Link href={`/press/${mention.slug}`} passHref>
                         <Button variant="outline" className="w-full">
-                          Read Article <BookOpen className="ml-2 h-4 w-4" /> {/* Changed icon */}
+                          Read Article <BookOpen className="ml-2 h-4 w-4" />
                         </Button>
                       </Link>
                     </div>
@@ -202,4 +202,3 @@ export default function PressAndAwardsPage() {
     </div>
   );
 }
-
