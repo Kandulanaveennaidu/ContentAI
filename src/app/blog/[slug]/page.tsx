@@ -1,18 +1,23 @@
 // src/app/blog/[slug]/page.tsx
 "use client";
 
+import { useEffect, useState } from 'react'; // Import hooks
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { blogPosts, type BlogPost, type ContentBlock } from '@/lib/blog-data';
+import { blogPosts as staticBlogPosts, type BlogPost, type ContentBlock } from '@/lib/blog-data'; // Renamed static data
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, CalendarDays, UserCircle, MessageSquare, Twitter, Linkedin, Facebook, Link2 } from 'lucide-react';
+import { ArrowLeft, CalendarDays, UserCircle, MessageSquare, Twitter, Linkedin, Facebook, Link2, Loader2 } from 'lucide-react'; // Added Loader2
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle
 import { Separator } from '@/components/ui/separator';
+import ReactMarkdown from 'react-markdown'; // Import react-markdown
+import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown plugin
+import * as LucideIcons from 'lucide-react'; // For rendering icons in content blocks if needed
+
 
 interface BlogSlugPageProps {
   params: {
@@ -25,11 +30,12 @@ const fadeIn = (delay: number = 0, y: number = 20) => ({
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: "easeOut" } },
 });
 
+// Modified renderContentBlock to include more types if needed (reusing from press/case studies)
 const renderContentBlock = (block: ContentBlock, index: number): JSX.Element => {
   switch (block.type) {
     case 'heading':
       const Tag = `h${block.level || 2}` as keyof JSX.IntrinsicElements;
-      return <Tag key={index} className={`text-${4 - (block.level || 2)}xl font-semibold mt-8 mb-4 text-foreground`}>{block.text}</Tag>;
+      return <Tag key={index} className={`text-${5 - (block.level || 2)}xl font-bold mt-8 mb-4 text-foreground`}>{block.text}</Tag>;
     case 'paragraph':
       return <p key={index} className="text-base md:text-lg text-muted-foreground leading-relaxed my-4">{block.text}</p>;
     case 'image':
@@ -56,6 +62,7 @@ const renderContentBlock = (block: ContentBlock, index: number): JSX.Element => 
       return (
         <blockquote key={index} className="my-6 pl-4 border-l-4 border-primary italic text-muted-foreground bg-secondary/50 p-4 rounded-r-md">
           <p className="text-lg md:text-xl">"{block.text}"</p>
+           {block.author && <cite className="block text-right mt-2 text-sm not-italic text-foreground">~ {block.author}</cite>}
         </blockquote>
       );
     case 'code':
@@ -64,22 +71,119 @@ const renderContentBlock = (block: ContentBlock, index: number): JSX.Element => 
           <code className={`language-${block.language || 'plaintext'}`}>{block.code}</code>
         </pre>
       );
+     case 'video':
+      return (
+        <motion.div
+            key={index}
+            className="my-10 rounded-lg overflow-hidden shadow-xl"
+            variants={fadeIn(0.2)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+        >
+          <video
+            src={block.src}
+            controls
+            className="w-full aspect-video bg-black"
+            poster={`https://picsum.photos/seed/${block.hint || 'vidprevslug'}/800/450?blur=1`}
+            data-ai-hint={block.hint || 'video case study'}
+          />
+          {block.caption && <p className="text-center text-sm text-muted-foreground mt-0 p-3 bg-secondary">{block.caption}</p>}
+        </motion.div>
+      );
+    case 'icon-section':
+      const IconComponent = block.icon ? LucideIcons[block.icon as keyof typeof LucideIcons] : null;
+      return (
+        <motion.div
+            key={index}
+            className="my-8 flex flex-col sm:flex-row items-center gap-4 md:gap-6 p-6 bg-card border border-border rounded-xl shadow-lg"
+            variants={fadeIn(0.2)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+        >
+          {IconComponent && (
+            <div className="flex-shrink-0 text-primary bg-primary/10 p-4 rounded-full">
+              <IconComponent className="h-8 w-8 md:h-10 md:w-10" />
+            </div>
+          )}
+          <div className="text-center sm:text-left">
+            {block.iconText && <p className="font-semibold text-xl md:text-2xl text-foreground mb-1">{block.iconText}</p>}
+            {block.text && <p className="text-muted-foreground text-base">{block.text}</p>}
+          </div>
+        </motion.div>
+      );
     default:
       return <></>;
+  }
+};
+
+// Function to load user posts (client-side only)
+const loadUserBlogPosts = (): BlogPost[] => {
+  if (typeof window === 'undefined') return []; 
+
+  const stored = localStorage.getItem('userGeneratedBlogPosts');
+  if (!stored) return [];
+
+  try {
+    const parsed: BlogPost[] = JSON.parse(stored);
+    if (Array.isArray(parsed) && parsed.every(p => p.slug && p.title && p.markdownContent && p.featuredImage?.src)) {
+      return parsed.map(p => ({
+            ...p,
+            imageSrc: p.imageSrc || p.featuredImage.src,
+            imageHint: p.imageHint || p.featuredImage.hint,
+        }));
+    }
+    return [];
+  } catch (e) {
+    console.error("Failed to parse user blog posts from localStorage", e);
+    return [];
   }
 };
 
 
 export default function BlogSlugPage({ params }: BlogSlugPageProps) {
   const { slug } = params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const [post, setPost] = useState<BlogPost | null | undefined>(undefined); // undefined initial state for loading
+  const [allPosts, setAllPosts] = useState<BlogPost[]>([]); // State to hold all posts
 
+
+  // Load all posts (static + user-generated) on client mount
+  useEffect(() => {
+    const userPosts = loadUserBlogPosts();
+    setAllPosts([...staticBlogPosts, ...userPosts]);
+  }, []);
+
+
+  // Find the specific post once allPosts are loaded
+  useEffect(() => {
+     if (allPosts.length > 0) {
+       const foundPost = allPosts.find((p) => p.slug === slug);
+       setPost(foundPost); // Set to foundPost or undefined if not found
+     }
+  }, [allPosts, slug]);
+
+  // Handle loading state
+  if (post === undefined) {
+    return (
+        <div className="flex min-h-screen flex-col bg-background">
+            <Header />
+            <main className="flex-grow py-12 md:py-16 flex items-center justify-center">
+                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </main>
+             <Footer />
+        </div>
+    );
+  }
+
+  // Handle not found state
   if (!post) {
     notFound();
   }
-
-  const relatedPosts = post.relatedReads
-    ? blogPosts.filter(p => post.relatedReads!.includes(p.slug) && p.slug !== post.slug).slice(0, 2)
+  
+  // Determine related posts based on the found post's relatedReads slugs
+   const relatedPosts = post.relatedReads
+    ? allPosts.filter(p => post.relatedReads!.includes(p.slug) && p.slug !== post.slug).slice(0, 2)
     : [];
 
   return (
@@ -138,8 +242,15 @@ export default function BlogSlugPage({ params }: BlogSlugPageProps) {
               />
             </motion.div>
 
+             {/* Render content: prioritize contentBlocks, fallback to markdownContent */}
             <div className="prose prose-lg dark:prose-invert max-w-none mx-auto">
-              {post.contentBlocks.map((block, index) => renderContentBlock(block, index))}
+              {post.contentBlocks && post.contentBlocks.length > 0 ? (
+                post.contentBlocks.map((block, index) => renderContentBlock(block, index))
+              ) : post.markdownContent ? (
+                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.markdownContent}</ReactMarkdown>
+              ) : (
+                <p className="text-muted-foreground italic">No content available for this post.</p>
+              )}
             </div>
 
             <Separator className="my-10 md:my-12" />
@@ -172,7 +283,7 @@ export default function BlogSlugPage({ params }: BlogSlugPageProps) {
                     <Card key={relatedPost.slug} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
                        <Link href={`/blog/${relatedPost.slug}`} passHref>
                          <div className="aspect-video overflow-hidden">
-                            <Image src={relatedPost.imageSrc} alt={relatedPost.title} width={400} height={225} className="object-cover w-full h-full hover:scale-105 transition-transform" data-ai-hint={relatedPost.imageHint}/>
+                            <Image src={relatedPost.featuredImage.src} alt={relatedPost.title} width={400} height={225} className="object-cover w-full h-full hover:scale-105 transition-transform" data-ai-hint={relatedPost.featuredImage.hint}/>
                          </div>
                        </Link>
                        <CardContent className="p-4">

@@ -1,15 +1,19 @@
 // src/lib/blog-data.ts
 
 export interface ContentBlock {
-  type: 'heading' | 'paragraph' | 'image' | 'list' | 'quote' | 'code';
+  type: 'heading' | 'paragraph' | 'image' | 'list' | 'quote' | 'code' | 'video' | 'icon-section'; // Added types from other data files
   level?: 2 | 3 | 4; // For headings h2, h3, h4
-  text?: string; // For paragraph, heading, quote
-  src?: string; // For image
+  text?: string; // For paragraph, heading, quote, iconText
+  src?: string; // For image or video
   alt?: string; // For image
-  hint?: string; // For image AI hint
+  hint?: string; // For image AI hint / video poster hint
   items?: string[]; // For list
   language?: string; // For code block
   code?: string; // For code block
+  icon?: keyof typeof import('lucide-react'); // Lucide icon name for icon-section
+  iconText?: string; // Title for icon-section
+  caption?: string; // For video or image
+  author?: string; // For quote
 }
 
 export interface BlogPost {
@@ -18,11 +22,12 @@ export interface BlogPost {
   date: string;
   author: string;
   excerpt: string;
-  imageSrc: string; // Main image for the card on /blog page
-  imageHint: string;
+  imageSrc?: string; // Made optional - will use featuredImage for card if needed
+  imageHint?: string; // Made optional
   tags: string[];
-  featuredImage: { src: string; alt: string; hint: string }; // For the individual blog post page
-  contentBlocks: ContentBlock[];
+  featuredImage: { src: string; alt: string; hint: string }; // Keep this mandatory
+  contentBlocks?: ContentBlock[]; // Made optional
+  markdownContent?: string; // Added field for raw markdown
   relatedReads?: string[]; // slugs of related posts
 }
 
@@ -42,7 +47,7 @@ const existingBlogPosts: BlogPost[] = [
     date: "October 26, 2023",
     author: "Dr. Lexi Data",
     excerpt: "Artificial intelligence is no longer a futuristic concept but a present-day tool revolutionizing how we create and consume content. Explore the top trends...",
-    imageSrc: "https://picsum.photos/seed/blogai/400/250",
+    imageSrc: "https://picsum.photos/seed/blogai/400/250", // Used for blog list card
     imageHint: "futuristic AI technology",
     tags: ["AI", "Content Creation", "Trends"],
     featuredImage: { 
@@ -50,7 +55,7 @@ const existingBlogPosts: BlogPost[] = [
       alt: "AI and content creation concept",
       hint: "abstract AI brain" 
     },
-    contentBlocks: [
+    contentBlocks: [ // Static posts use contentBlocks
       { type: 'paragraph', text: "Artificial intelligence (AI) is rapidly transforming the landscape of content creation. What once seemed like science fiction is now a practical toolkit for writers, marketers, and businesses. In 2024, several key AI trends are set to redefine how we approach content strategy, production, and optimization." },
       { type: 'heading', level: 2, text: "1. Hyper-Personalization at Scale" },
       { type: 'paragraph', text: "AI algorithms are becoming increasingly adept at analyzing vast amounts of user data to deliver highly personalized content experiences. This means tailoring messaging, recommendations, and even content formats to individual preferences and behaviors. Expect to see more dynamic content that adapts in real-time." },
@@ -305,5 +310,32 @@ const aiStudiesBlogPosts: BlogPost[] = [
   }
 ];
 
-// Combine all blog posts
-export const blogPosts: BlogPost[] = [...existingBlogPosts, ...aiStudiesBlogPosts];
+// Function to load user-generated posts from localStorage
+const loadUserBlogPosts = (): BlogPost[] => {
+  if (typeof window === 'undefined') return []; // Guard against SSR/build time access
+
+  const stored = localStorage.getItem('userGeneratedBlogPosts');
+  if (!stored) return [];
+
+  try {
+    const parsed: BlogPost[] = JSON.parse(stored);
+    // Basic validation: Ensure it's an array and items have essential props
+    if (Array.isArray(parsed) && parsed.every(p => p.slug && p.title && p.markdownContent && p.featuredImage?.src)) {
+        // Populate missing optional fields if needed, e.g., imageSrc for cards
+         return parsed.map(p => ({
+            ...p,
+            imageSrc: p.imageSrc || p.featuredImage.src, // Use featured image if card image missing
+            imageHint: p.imageHint || p.featuredImage.hint,
+        }));
+    }
+    return [];
+  } catch (e) {
+    console.error("Failed to parse user blog posts from localStorage", e);
+    return [];
+  }
+};
+
+// Combine static and potentially dynamic user posts
+// Note: We call loadUserBlogPosts directly here. This works for client-side rendering.
+// For SSR/SSG, this data loading would need to happen differently (e.g., API route, getStaticProps).
+export const blogPosts: BlogPost[] = [...existingBlogPosts, ...loadUserBlogPosts()];

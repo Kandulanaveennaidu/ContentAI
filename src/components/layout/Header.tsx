@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle, BookOpen, ChevronDown, CalendarCheck, FileText, Users, Target, Award, FlaskConical, MessageSquareQuote, FileJson, Edit3, LogOut } from 'lucide-react';
+import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle, BookOpen, ChevronDown, CalendarCheck, FileText, Users, Target, Award, FlaskConical, MessageSquareQuote, FileJson, Edit3, LogOut, Wand2 } from 'lucide-react'; // Added Wand2
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
@@ -36,6 +36,7 @@ const resourcesDropdownLinks = [
 
 const appNavLink = { href: '/analyze', label: 'Analyze Content', icon: Sparkles };
 const dashboardLink = { href: '/dashboard', label: 'Dashboard', icon: BarChartHorizontalBig };
+const generateBlogLink = { href: '/generate-blog', label: 'Generate Blog', icon: Wand2 }; // New link
 
 // Default user structure if localStorage is empty or invalid
 const defaultUser = {
@@ -149,12 +150,12 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isAppRelatedPage = pathname.startsWith('/analyze') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/settings');
+  const isAppRelatedPage = pathname.startsWith('/analyze') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/settings') || pathname.startsWith('/generate-blog'); // Added generate-blog
   
   const navLinksToDisplay = isAppRelatedPage ? [] : mainNavLinksBase;
   
   const mobileNavLinks = isAppRelatedPage 
-    ? [dashboardLink, appNavLink, ...authLinks(isLoggedIn, handleLogout)] 
+    ? [dashboardLink, appNavLink, generateBlogLink, ...authLinks(isLoggedIn, handleLogout)] // Added generateBlogLink
     : [...mainNavLinksBase, 
         {label: "Resources", isDropdown: true, items: resourcesDropdownLinks},
         appNavLink, 
@@ -235,21 +236,28 @@ export function Header() {
             </Link>
           )}
           
+          {/* Links visible only on app-related pages */}
           {isAppRelatedPage && (
-             <Link href={dashboardLink.href} passHref>
-                <Button variant="ghost" size="sm" className={cn(pathname.startsWith('/dashboard') && "text-primary bg-accent/20")}>
-                   {React.createElement(dashboardLink.icon, { className: "mr-2 h-4 w-4"})}
-                  {dashboardLink.label}
-                </Button>
-              </Link>
-          )}
-           {isAppRelatedPage && (
-             <Link href={appNavLink.href} passHref>
-                <Button variant="ghost" size="sm" className={cn(pathname.startsWith('/analyze') && "text-primary bg-accent/20")}>
-                   {React.createElement(appNavLink.icon, { className: "mr-2 h-4 w-4"})}
-                  {appNavLink.label}
-                </Button>
-              </Link>
+             <>
+              <Link href={dashboardLink.href} passHref>
+                  <Button variant="ghost" size="sm" className={cn(pathname.startsWith('/dashboard') && "text-primary bg-accent/20")}>
+                     {React.createElement(dashboardLink.icon, { className: "mr-2 h-4 w-4"})}
+                    {dashboardLink.label}
+                  </Button>
+                </Link>
+               <Link href={appNavLink.href} passHref>
+                  <Button variant="ghost" size="sm" className={cn(pathname.startsWith('/analyze') && "text-primary bg-accent/20")}>
+                     {React.createElement(appNavLink.icon, { className: "mr-2 h-4 w-4"})}
+                    {appNavLink.label}
+                  </Button>
+                </Link>
+                 <Link href={generateBlogLink.href} passHref>
+                  <Button variant="ghost" size="sm" className={cn(pathname.startsWith('/generate-blog') && "text-primary bg-accent/20")}>
+                     {React.createElement(generateBlogLink.icon, { className: "mr-2 h-4 w-4"})}
+                    {generateBlogLink.label}
+                  </Button>
+                </Link>
+             </>
           )}
 
 
@@ -385,4 +393,5 @@ export function Header() {
     </motion.header>
   );
 }
+
 
