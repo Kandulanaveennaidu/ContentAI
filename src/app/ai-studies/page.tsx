@@ -10,6 +10,14 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Helper function to generate slugs
+const generateSlug = (title: string) => {
+    return title.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+};
+
 const aiStudies = [
   {
     title: "The Impact of Flesch-Kincaid Score Optimization on User Engagement",
@@ -138,7 +146,8 @@ export default function AiStudiesPage() {
                                     Read Full Study (PDF) <Download className="ml-2 h-4 w-4" />
                                 </Button>
                             </Link>
-                             <Link href={`/blog/ai-study-${study.title.toLowerCase().replace(/\s+/g, '-')}`} passHref>
+                             {/* Updated Link to use generated slug */}
+                             <Link href={`/blog/ai-study-${generateSlug(study.title)}`} passHref>
                                 <Button variant="outline">
                                     View Blog Post <ExternalLink className="ml-2 h-4 w-4" />
                                 </Button>
