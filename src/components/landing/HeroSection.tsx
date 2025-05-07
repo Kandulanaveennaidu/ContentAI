@@ -16,24 +16,24 @@ export function HeroSection() {
       {/* Add the VideoBackground component */}
       <VideoBackground src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-vr-glasses-42930-large.mp4" />
       {/* Container needs higher z-index than video background */}
-      <div className="relative z-10 container mx-auto px-4 md:px-6"> 
-        <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white" // Changed back to text-white
+      <div className="relative z-10 container mx-auto px-4 md:px-6">
+        <motion.h1
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black" // Changed base text to black
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
-        <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-gray-100 md:text-xl" // Changed to light gray for visibility
+        <motion.p
+          className="mx-auto mt-6 max-w-[700px] text-lg text-black md:text-xl" // Changed text to black
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
         >
           Leverage AI to analyze readability, predict engagement, and receive actionable insights to make your content shine.
         </motion.p>
-        <motion.div 
+        <motion.div
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -41,6 +41,7 @@ export function HeroSection() {
         >
           <Link href="/signup" passHref>
             <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+              {/* Button retains its styling for visibility */}
               <Button size="lg" className="w-full sm:w-auto shadow-xl hover:shadow-primary/50">
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -49,10 +50,11 @@ export function HeroSection() {
           </Link>
           <Link href="#features" passHref>
              <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
+               {/* Button retains its styling for visibility */}
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-white border-white/70 hover:bg-white hover:text-primary transition-colors backdrop-blur-sm bg-black/30 hover:bg-white/90" // Adjusted style for better visibility on dark overlay
+                className="w-full sm:w-auto text-white border-white/70 hover:bg-white hover:text-primary transition-colors backdrop-blur-sm bg-black/30 hover:bg-white/90" 
               >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Learn More
