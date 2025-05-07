@@ -15,10 +15,10 @@ export function HeroSection() {
     <section className="relative flex h-[calc(100vh-5rem)] min-h-[600px] items-center justify-center overflow-hidden text-center">
       {/* Add the VideoBackground component */}
       <VideoBackground src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-man-with-vr-glasses-42930-large.mp4" />
-      <div className="relative z-10 container mx-auto px-4 md:px-6">
+      {/* Container needs higher z-index than video background */}
+      <div className="relative z-10 container mx-auto px-4 md:px-6"> 
         <motion.h1 
-          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground dark:text-gray-50" // Changed text color for better contrast over video
-          style={{ textShadow: '0px 2px 4px rgba(0, 0, 0, 0.5)' }} // Added text shadow
+          className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-black" // Changed to text-black, removed shadow
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
@@ -26,8 +26,7 @@ export function HeroSection() {
           Unlock Your Content's <span className="text-primary">Full Potential</span>
         </motion.h1>
         <motion.p 
-          className="mx-auto mt-6 max-w-[700px] text-lg text-primary-foreground dark:text-gray-200 md:text-xl" // Changed text color
-          style={{ textShadow: '0px 1px 3px rgba(0, 0, 0, 0.6)' }} // Added text shadow
+          className="mx-auto mt-6 max-w-[700px] text-lg text-black md:text-xl" // Changed to text-black, removed shadow
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
@@ -53,7 +52,7 @@ export function HeroSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto text-primary-foreground border-primary-foreground/70 hover:bg-primary-foreground hover:text-primary transition-colors backdrop-blur-sm bg-black/20 hover:bg-black/40" // Adjusted style for visibility
+                className="w-full sm:w-auto text-white border-white/70 hover:bg-white hover:text-primary transition-colors backdrop-blur-sm bg-black/30 hover:bg-white/90" // Adjusted style for better visibility on dark overlay
               >
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Learn More

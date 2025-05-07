@@ -17,7 +17,7 @@ export function VideoBackground({ src }: VideoBackgroundProps) {
   }, []);
   
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden">
+    <div className="absolute inset-0 -z-10 overflow-hidden"> {/* Ensure negative z-index */}
       <video
         ref={videoRef}
         className="absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
@@ -29,8 +29,8 @@ export function VideoBackground({ src }: VideoBackgroundProps) {
         poster="https://picsum.photos/1920/1080?blur=2" // Placeholder poster
         data-ai-hint="abstract technology"
       />
-      {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 bg-black/75"></div> 
+      {/* Dark overlay for better text contrast - Ensure this is above the video but below content */}
+      <div className="absolute inset-0 bg-black/75 z-0"></div> 
     </div>
   );
 }
