@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   title: 'ContentAI - Amplify Your Content',
   description: 'AI-powered content analysis for readability and engagement.',
   icons: {
-    icon: '/logo.svg', // Use the new SVG logo
+    // Reference the updated SVG logo for favicon
+    icon: '/logo.svg', 
   }
 };
 
@@ -19,10 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased" suppressHydrationWarning>
+      {/* Added suppressHydrationWarning to body as well */}
+      <body className="font-sans antialiased" suppressHydrationWarning> 
         <ThemeProvider
           attribute="class"
-          defaultTheme="system" // Changed from light to system default
+          defaultTheme="system" 
           enableSystem
           disableTransitionOnChange
         >
@@ -33,3 +35,4 @@ export default function RootLayout({
     </html>
   );
 }
+

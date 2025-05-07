@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle, BookOpen, ChevronDown, CalendarCheck, FileText, Users, Target, Award, FlaskConical, MessageSquareQuote, FileJson, Edit3, LogOut, Wand2 } from 'lucide-react'; // Added Wand2
+import { Menu, Sparkles, Sun, Moon, BarChartHorizontalBig, Settings, UserCircle, BookOpen, ChevronDown, CalendarCheck, FileText, Users, Target, Award, FlaskConical, MessageSquareQuote, FileJson, Edit3, LogOut, Wand2 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
@@ -36,7 +36,7 @@ const resourcesDropdownLinks = [
 
 const appNavLink = { href: '/analyze', label: 'Analyze Content', icon: Sparkles };
 const dashboardLink = { href: '/dashboard', label: 'Dashboard', icon: BarChartHorizontalBig };
-const generateBlogLink = { href: '/generate-blog', label: 'Generate Blog', icon: Wand2 }; // New link
+const generateBlogLink = { href: '/generate-blog', label: 'Generate Blog', icon: Wand2 };
 
 // Default user structure if localStorage is empty or invalid
 const defaultUser = {
@@ -83,6 +83,8 @@ export function Header() {
                 // Logged in, but no profile? Use defaults. Should ideally not happen.
                  setUserAvatar(defaultUser.avatarDataUrl);
                  setUserName(defaultUser.name);
+                 // Optionally save default profile if logged in but no profile found
+                 localStorage.setItem('userProfile', JSON.stringify({ name: defaultUser.name, email: '', avatarDataUrl: null, bio: '', plan: 'Free' }));
             }
         } else {
             setUserAvatar(null);
@@ -150,12 +152,12 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isAppRelatedPage = pathname.startsWith('/analyze') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/settings') || pathname.startsWith('/generate-blog'); // Added generate-blog
+  const isAppRelatedPage = pathname.startsWith('/analyze') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile') || pathname.startsWith('/settings') || pathname.startsWith('/generate-blog');
   
   const navLinksToDisplay = isAppRelatedPage ? [] : mainNavLinksBase;
   
   const mobileNavLinks = isAppRelatedPage 
-    ? [dashboardLink, appNavLink, generateBlogLink, ...authLinks(isLoggedIn, handleLogout)] // Added generateBlogLink
+    ? [dashboardLink, appNavLink, generateBlogLink, ...authLinks(isLoggedIn, handleLogout)] 
     : [...mainNavLinksBase, 
         {label: "Resources", isDropdown: true, items: resourcesDropdownLinks},
         appNavLink, 
@@ -176,7 +178,8 @@ export function Header() {
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2" aria-label="ContentAI Home"> 
-          <Image src="/logo.svg" alt="ContentAI Logo" width={36} height={36} /> 
+          {/* Reference the updated SVG logo */}
+          <Image src="/logo.svg" alt="ContentAI Logo" width={40} height={40} /> 
           <span className="text-2xl font-bold tracking-tight text-foreground">
             Content<span className="text-primary">AI</span>
           </span>
@@ -334,7 +337,8 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] bg-background p-6">
               <div className="mb-6 flex items-center gap-2">
-                <Image src="/logo.svg" alt="ContentAI Logo" width={32} height={32} />
+                {/* Reference the updated SVG logo */}
+                <Image src="/logo.svg" alt="ContentAI Logo" width={40} height={40} /> 
                  <span className="text-xl font-bold tracking-tight text-foreground">
                     Content<span className="text-primary">AI</span>
                  </span>
@@ -393,5 +397,6 @@ export function Header() {
     </motion.header>
   );
 }
+
 
 

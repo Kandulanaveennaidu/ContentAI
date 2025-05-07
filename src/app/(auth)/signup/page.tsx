@@ -57,6 +57,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md shadow-2xl animate-fadeIn">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
+             {/* Reference the updated SVG logo */}
             <Image src="/logo.svg" alt="ContentAI Logo" width={40} height={40} className="mx-auto" />
           </Link>
           <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
@@ -122,4 +123,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
 

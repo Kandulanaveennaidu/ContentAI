@@ -22,6 +22,16 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+// Define a default structure in case nothing is in localStorage
+const defaultUser = {
+  name: "Alex Johnson",
+  email: "alex.j@example.com", // Use a generic default email
+  avatarDataUrl: null, // No default avatar image, rely on fallback
+  bio: "Content strategist and AI enthusiast.",
+  plan: "Pro Plan", // Plan is not part of the editable form for now
+};
+
+
 export default function LoginPage() {
   const router = useRouter(); // Initialize useRouter
   const { toast } = useToast(); // Initialize useToast
@@ -38,8 +48,30 @@ export default function LoginPage() {
     console.log(data);
     // Handle login logic here
     // For demonstration, set a localStorage item to simulate login
+    // And create a default profile if one doesn't exist
     if (typeof window !== "undefined") {
         localStorage.setItem('isLoggedIn', 'true');
+        
+        // Set a basic profile if none exists
+        if (!localStorage.getItem('userProfile')) {
+             const basicProfile = {
+                ...defaultUser, // Start with defaults
+                email: data.email, // Use the entered email
+                name: "New User", // A placeholder name
+                avatarDataUrl: null,
+                bio: "Just joined ContentAI!",
+                plan: "Free" // Default to Free plan on first login
+            };
+            localStorage.setItem('userProfile', JSON.stringify(basicProfile));
+            // Dispatch event so header updates immediately
+            window.dispatchEvent(new CustomEvent('profileUpdated', { detail: basicProfile }));
+        } else {
+            // If profile exists, trigger update in case header missed it
+            try {
+                const existingProfile = JSON.parse(localStorage.getItem('userProfile')!);
+                window.dispatchEvent(new CustomEvent('profileUpdated', { detail: existingProfile }));
+            } catch (e) { /* Ignore parse error */ }
+        }
     }
     toast({
         title: "Login Successful!",
@@ -53,6 +85,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl animate-fadeIn">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
+             {/* Reference the updated SVG logo */}
             <Image src="/logo.svg" alt="ContentAI Logo" width={40} height={40} className="mx-auto" />
           </Link>
           <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
@@ -110,3 +143,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
