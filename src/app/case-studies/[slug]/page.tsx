@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { caseStudies, type CaseStudy } from '@/app/case-studies/page'; // Assuming CaseStudy type and data are exported from here
+import { caseStudies, type CaseStudy } from '@/lib/case-studies-data'; // Import from the new data file
 import type { PressContentBlock as CaseStudyContentBlock } from '@/lib/press-articles-data';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,8 +35,8 @@ const renderContentBlock = (block: CaseStudyContentBlock, index: number): JSX.El
       return <p key={index} className="text-base md:text-lg text-muted-foreground leading-relaxed my-5">{block.text}</p>;
     case 'image':
       return (
-        <motion.figure 
-          key={index} 
+        <motion.figure
+          key={index}
           className="my-8 overflow-hidden rounded-lg shadow-xl"
           variants={fadeIn(0.2)}
           initial="hidden"
@@ -62,8 +62,8 @@ const renderContentBlock = (block: CaseStudyContentBlock, index: number): JSX.El
       );
     case 'video':
       return (
-        <motion.div 
-            key={index} 
+        <motion.div
+            key={index}
             className="my-10 rounded-lg overflow-hidden shadow-xl"
             variants={fadeIn(0.2)}
             initial="hidden"
@@ -82,8 +82,8 @@ const renderContentBlock = (block: CaseStudyContentBlock, index: number): JSX.El
       );
     case 'icon-section':
       return (
-        <motion.div 
-            key={index} 
+        <motion.div
+            key={index}
             className="my-8 flex flex-col sm:flex-row items-center gap-4 md:gap-6 p-6 bg-card border border-border rounded-xl shadow-lg"
             variants={fadeIn(0.2)}
             initial="hidden"
@@ -129,19 +129,19 @@ export default function CaseStudySlugPage({ params }: CaseStudySlugPageProps) {
                 <LucideIcons.ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Case Studies
               </Link>
-              
+
               <motion.div className="flex justify-center items-center gap-2 mb-2" variants={fadeIn(0.05)}>
                 <Badge variant="secondary" className="text-base px-3 py-1">{study.industry}</Badge>
               </motion.div>
-              
-              <motion.h1 
+
+              <motion.h1
                 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-3"
                 variants={fadeIn(0.1)}
               >
                 {study.client}: <span className="text-primary">{study.challenge.length > 50 ? study.challenge.substring(0,50) + "..." : study.challenge}</span>
               </motion.h1>
                {study.date && (
-                <motion.p 
+                <motion.p
                     className="text-sm text-muted-foreground mb-5"
                     variants={fadeIn(0.15)}
                 >
@@ -150,7 +150,7 @@ export default function CaseStudySlugPage({ params }: CaseStudySlugPageProps) {
                )}
             </div>
 
-            <motion.div 
+            <motion.div
               className="mb-10 md:mb-12 overflow-hidden rounded-2xl shadow-2xl border-4 border-primary/20"
               variants={fadeIn(0.2)}
             >
@@ -164,8 +164,8 @@ export default function CaseStudySlugPage({ params }: CaseStudySlugPageProps) {
                 data-ai-hint={study.featuredImageFull.hint}
               />
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
                 className="text-lg md:text-xl text-muted-foreground leading-relaxed my-8 p-6 bg-secondary/30 rounded-xl border-l-4 border-primary shadow"
                 variants={fadeIn(0.25)}
             >
@@ -210,7 +210,7 @@ export default function CaseStudySlugPage({ params }: CaseStudySlugPageProps) {
                  </motion.div>
             )}
 
-            <motion.div 
+            <motion.div
               className="text-center py-10 mt-12 bg-gradient-to-r from-primary to-accent rounded-lg"
               variants={fadeIn(0.4)}
             >
