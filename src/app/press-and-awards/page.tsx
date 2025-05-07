@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Award, Newspaper, Download, ExternalLink, MessageSquare } from 'lucide-react';
+import { Award, Newspaper, Download, BookOpen, MessageSquare } from 'lucide-react'; // Changed ExternalLink to BookOpen
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,25 +14,25 @@ const pressMentions = [
   {
     publication: "Tech Innovate Magazine",
     title: "ContentAI: Revolutionizing Content Strategy with AI",
+    slug: "contentai-revolutionizing-content-strategy-with-ai",
     date: "September 15, 2023",
-    link: "#", // Placeholder link
-    logoSrc: "https://picsum.photos/seed/techinnovate/150/50?grayscale", // Placeholder logo
+    logoSrc: "https://picsum.photos/seed/techinnovate/150/50", // Removed grayscale
     logoHint: "magazine logo tech"
   },
   {
     publication: "AI Weekly Chronicle",
     title: "The Future of Writing: How ContentAI is Leading the Charge",
+    slug: "the-future-of-writing-how-contentai-is-leading-the-charge",
     date: "August 28, 2023",
-    link: "#",
-    logoSrc: "https://picsum.photos/seed/aiweekly/150/50?grayscale",
+    logoSrc: "https://picsum.photos/seed/aiweekly/150/50", // Removed grayscale
     logoHint: "news logo AI"
   },
   {
     publication: "Marketing Pro Daily",
     title: "ContentAI's Engagement Prediction Tool: A Game Changer for Marketers",
+    slug: "contentais-engagement-prediction-tool-a-game-changer-for-marketers",
     date: "July 05, 2023",
-    link: "#",
-    logoSrc: "https://picsum.photos/seed/marketingpro/150/50?grayscale",
+    logoSrc: "https://picsum.photos/seed/marketingpro/150/50", // Removed grayscale
     logoHint: "marketing logo pro"
   },
 ];
@@ -50,7 +50,7 @@ const awards = [
     name: "Top Content Tech Solution 2023",
     awardedBy: "Content Marketing Institute",
     description: "Awarded for providing a leading technology solution that significantly improves content quality and effectiveness.",
-    icon: MessageSquare,
+    icon: MessageSquare, // Changed from MessageSquareQuote to MessageSquare, or keep as is if preferred
     imageSrc: "https://picsum.photos/seed/awardcontent/300/200",
     imageHint: "certificate award document"
   },
@@ -110,16 +110,23 @@ export default function PressAndAwardsPage() {
                   <Card className="h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                     <CardHeader>
                       <div className="mb-3 h-12 flex items-center">
-                        <Image src={mention.logoSrc} alt={`${mention.publication} Logo`} width={120} height={40} className="object-contain" data-ai-hint={mention.logoHint} />
+                        <Image 
+                          src={mention.logoSrc} 
+                          alt={`${mention.publication} Logo`} 
+                          width={120} // Adjusted to match original values if they worked
+                          height={40}
+                          className="object-contain" 
+                          data-ai-hint={mention.logoHint} 
+                        />
                       </div>
                       <CardTitle className="text-lg leading-snug">{mention.title}</CardTitle>
                       <CardDescription>{mention.publication} - {mention.date}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow"></CardContent> {/* Spacer */}
                     <div className="p-4 pt-0">
-                      <Link href={mention.link} target="_blank" rel="noopener noreferrer">
+                      <Link href={`/press/${mention.slug}`} passHref>
                         <Button variant="outline" className="w-full">
-                          Read Article <ExternalLink className="ml-2 h-4 w-4" />
+                          Read Article <BookOpen className="ml-2 h-4 w-4" /> {/* Changed icon */}
                         </Button>
                       </Link>
                     </div>
@@ -177,8 +184,10 @@ export default function PressAndAwardsPage() {
               Access our official logos, brand guidelines, and company information. For interviews or specific requests, please contact our media team.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Button size="lg">
-                <Download className="mr-2 h-5 w-5" /> Download Press Kit
+              <Button size="lg" asChild>
+                <a href="/assets/ContentAI-Press-Kit.pdf" download="ContentAI-Press-Kit.pdf">
+                    <Download className="mr-2 h-5 w-5" /> Download Press Kit
+                </a>
               </Button>
               <Link href="/contact?subject=MediaInquiry" passHref>
                 <Button size="lg" variant="outline" className="border-secondary-foreground/50 text-secondary-foreground hover:bg-secondary-foreground/10">
@@ -193,3 +202,4 @@ export default function PressAndAwardsPage() {
     </div>
   );
 }
+
