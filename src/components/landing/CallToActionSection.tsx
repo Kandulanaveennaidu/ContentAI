@@ -4,13 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const MotionButton = motion(Button); // Create a motion component from Button
+// Create a motion component from Button if needed for other animations,
+// but we will remove specific hover variants from it for now.
+const MotionButton = motion(Button); 
 
 export function CallToActionSection() {
-  const buttonVariants = {
-    hover: { scale: 1.05, boxShadow: "0px 8px 25px rgba(0,0,0,0.2)" , transition: { type: "spring", stiffness: 300 } },
-    tap: { scale: 0.95 }
-  };
+  // Removed buttonVariants as we'll rely on CSS for hover
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -60,14 +59,12 @@ export function CallToActionSection() {
           viewport={{ once: true }}
         >
           <Link href="/signup" passHref>
-             {/* Apply motion directly to the Button */}
+             {/* Use standard Button or MotionButton without hover variant override */}
             <MotionButton 
               size="lg" 
               variant="secondary" 
-              className="text-primary bg-primary-foreground hover:bg-primary-foreground/90"
-              whileHover="hover" 
-              whileTap="tap" 
-              variants={buttonVariants}
+              className="text-primary bg-primary-foreground hover:bg-primary-foreground/90 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg" // Added standard transition and hover classes
+              whileTap={{ scale: 0.95 }} // Keep tap effect if desired
              >
               Sign Up for Free
             </MotionButton>
