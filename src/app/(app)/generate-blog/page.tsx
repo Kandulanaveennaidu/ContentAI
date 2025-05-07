@@ -261,7 +261,7 @@ export default function GenerateBlogPage() {
                     <CardHeader>
                         <CardTitle className="text-2xl md:text-3xl">{generatedData.title}</CardTitle>
                         <CardDescription className="flex flex-wrap gap-2 pt-2">
-                            <span className="font-semibold mr-2 flex items-center"><Tags className="h-4 w-4 mr-1"/> Tags:</span> 
+                            <span className="font-semibold mr-2 flex items-center"><Tags className="h-4 w-4 mr-1"/> Tags:</span>
                             {generatedData.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
                         </CardDescription>
                          <CardDescription className="pt-1 italic"><span className="font-semibold not-italic mr-1 flex items-center"><FileText className="h-4 w-4 mr-1"/> Excerpt:</span> {generatedData.excerpt}</CardDescription>
@@ -284,7 +284,7 @@ export default function GenerateBlogPage() {
                                         <ImagePlus className="h-16 w-16 text-muted-foreground"/>
                                     </div>
                                 )}
-                                 <div 
+                                 <div
                                     className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                     onClick={() => fileInputRef.current?.click()}
                                     title="Upload new image"
@@ -292,12 +292,12 @@ export default function GenerateBlogPage() {
                                     <UploadCloud className="h-10 w-10 text-white" />
                                 </div>
                             </div>
-                            <Input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                className="hidden" 
+                            <Input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
                                 accept="image/png, image/jpeg, image/webp" // Specify accepted types
-                                onChange={handleImageChange} 
+                                onChange={handleImageChange}
                             />
                             <Button variant="outline" size="sm" className="mt-3" onClick={() => fileInputRef.current?.click()}>
                                 <ImagePlus className="mr-2 h-4 w-4" /> Change Image
@@ -307,8 +307,8 @@ export default function GenerateBlogPage() {
                         {/* Content Section */}
                         <div>
                             <Label className="text-lg font-semibold">Generated Content (Markdown)</Label>
-                             {/* Apply prose styles for better Markdown rendering */}
-                            <div className="mt-2 p-4 border rounded-md bg-muted/30 prose dark:prose-invert prose-sm sm:prose-base max-w-none">
+                             {/* Apply prose styles for better Markdown rendering & ensure width fits */}
+                            <div className="mt-2 p-4 border rounded-md bg-muted/30 prose dark:prose-invert prose-sm sm:prose-base max-w-full break-words overflow-hidden">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {generatedData.markdownContent}
                                 </ReactMarkdown>
