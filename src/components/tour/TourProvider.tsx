@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -38,19 +39,15 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     setIsMounted(true);
-    if (typeof window !== 'undefined') {
-        const tourCompleted = localStorage.getItem(TOUR_COMPLETED_KEY);
-        if (tourCompleted === 'true') {
-            setIsTourActive(false);
-        }
-    }
+    // Logic for checking TOUR_COMPLETED_KEY and deciding whether to auto-start a tour
+    // is now primarily handled by the components that initiate the tour (e.g., AnalyzePage)
+    // by conditionally calling startTour.
   }, []);
 
 
   const startTour = useCallback((tourSteps: TourStep[]) => {
-    if (typeof window !== 'undefined' && localStorage.getItem(TOUR_COMPLETED_KEY) === 'true') {
-      return; // Don't start if already completed
-    }
+    // The check for TOUR_COMPLETED_KEY before starting is expected to be done by the caller.
+    // If this provider were to manage a global app tour, that check could live here.
     setSteps(tourSteps);
     setCurrentStepIndex(0);
     setIsTourActive(true);
@@ -90,6 +87,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setHighlightedElementRect(rect);
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
+        console.warn(`Tour target element not found: ${currentStep.target}`);
         setHighlightedElementRect(null); // Target not found
       }
     } else if (currentStep && currentStep.target === 'center') {
@@ -99,10 +97,10 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isTourActive, currentStep]);
 
-  if (!isMounted) return <>{children}</>;
-
 
   const getTooltipPosition = () => {
+    // This function is called only when isMounted && isTourActive && currentStep is true,
+    // so access to `window` should be safe.
     if (!highlightedElementRect || !currentStep || currentStep.target === 'center') {
       return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'fixed' as 'fixed' };
     }
@@ -124,12 +122,13 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const contextValue = { startTour, nextStep, prevStep, endTour, currentStepIndex, isTourActive, currentStep };
 
   return (
-    <TourContext.Provider value={{ startTour, nextStep, prevStep, endTour, currentStepIndex, isTourActive, currentStep }}>
+    <TourContext.Provider value={contextValue}>
       {children}
       <AnimatePresence>
-        {isTourActive && currentStep && (
+        {isMounted && isTourActive && currentStep && (
           <>
             {/* Overlay */}
             <motion.div
@@ -141,7 +140,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
               onClick={(e) => { /* Prevent clicks on overlay from closing tour by default */ e.stopPropagation(); }}
             />
 
-            {/* Highlight Box (optional, can be complex with SVG masks) */}
+            {/* Highlight Box */}
             {highlightedElementRect && currentStep.target !== 'center' && (
                 <motion.div
                     key="tour-highlight"
@@ -157,7 +156,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     className="fixed rounded-md border-2 border-primary shadow-2xl z-[9999] pointer-events-none"
                     style={{
                       boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)', // "Cutout" effect
-                      borderColor: 'hsl(var(--primary))', // Ensure primary color is used
+                      borderColor: 'hsl(var(--primary))', 
                     }}
                  />
             )}
@@ -211,3 +210,4 @@ export const useTour = () => {
   }
   return context;
 };
+
