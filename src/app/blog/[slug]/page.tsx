@@ -14,8 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card'; // Removed CardHeader, CardTitle
 import { Separator } from '@/components/ui/separator';
-import ReactMarkdown from 'react-markdown'; // Import react-markdown
-import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown plugin
+import ReactMarkdown from 'react-markdown'; // Correct import
+import remarkGfm from 'remark-gfm'; // Correct import
 import * as LucideIcons from 'lucide-react'; // For rendering icons in content blocks if needed
 
 
