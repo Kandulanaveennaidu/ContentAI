@@ -1,17 +1,15 @@
 // src/app/terms-of-service/page.tsx
-"use client";
 
+// Removed "use client" directive
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, ShieldCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+// Removed framer-motion import
+import Link from 'next/link'; // Ensure Link is imported
 
-const fadeIn = (delay: number = 0) => ({
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: "easeOut" } },
-});
+// Removed fadeIn function
 
 export default function TermsOfServicePage() {
   const lastUpdated = "October 27, 2023"; // Example date
@@ -21,11 +19,10 @@ export default function TermsOfServicePage() {
       <Header />
       <main className="flex-grow py-12 md:py-20">
         <div className="container mx-auto px-4 md:px-6">
-          <motion.section
+          {/* Removed motion.section wrapper */}
+          <section
             className="text-center mb-12 md:mb-16"
-            variants={fadeIn()}
-            initial="hidden"
-            animate="visible"
+            // Removed motion props
           >
             <FileText className="mx-auto h-16 w-16 text-primary mb-4" />
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
@@ -35,13 +32,10 @@ export default function TermsOfServicePage() {
               Please read these Terms of Service carefully before using the ContentAI platform.
             </p>
             <p className="mt-2 text-sm text-muted-foreground">Last Updated: {lastUpdated}</p>
-          </motion.section>
+          </section>
 
-          <motion.div
-            variants={fadeIn(0.2)}
-            initial="hidden"
-            animate="visible"
-          >
+          {/* Removed motion.div wrapper */}
+          <div>
             <Card className="shadow-xl max-w-4xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center">
@@ -137,7 +131,7 @@ export default function TermsOfServicePage() {
                 </ScrollArea>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </div>
       </main>
       <Footer />
